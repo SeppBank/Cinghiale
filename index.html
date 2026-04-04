@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -410,8 +409,8 @@
     <div id="dashboard" class="section active">
       <div class="metrics">
         <div class="metric"><div class="lbl">Postazioni</div><div class="val">55</div></div>
-        <div class="metric"><div class="lbl">Uscite</div><div class="val">10</div></div>
-        <div class="metric"><div class="lbl">Abbattimenti</div><div class="val">5</div></div>
+        <div class="metric"><div class="lbl">Uscite</div><div class="val" id="dash-uscite-count">—</div></div>
+        <div class="metric"><div class="lbl">Abbattimenti</div><div class="val" id="dash-abbattimenti">—</div></div>
         <div class="metric"><div class="lbl">Eradicatori</div><div class="val">50</div></div>
         <div class="metric"><div class="lbl">Fascette assegnate</div><div class="val">89</div></div>
         <div class="metric"><div class="lbl">Fascette usate</div><div class="val">46</div></div>
@@ -425,7 +424,7 @@
         <div class="card">
           <div class="card-head"><h3>Ultimi abbattimenti</h3></div>
           <div class="table-wrap">
-            <table><thead><tr><th>N.</th><th>Cacciatore</th><th>Data</th><th>Sex</th><th>Tipo</th><th>Fascetta</th></tr></thead>
+            <table><thead><tr><th>Cacciatore</th><th>Data</th><th>Sex</th><th>Tipo</th><th>Fascetta</th></tr></thead>
             <tbody id="dash-tbody-abbattimenti"></tbody></table>
           </div>
         </div>
@@ -1282,10 +1281,10 @@ function renderAbbattimenti(){
   // Ordina per data crescente (copia per non alterare l'array originale)
   const ordinati = ABBATTIMENTI.map((r,i)=>({r,i}))
     .sort((a,b) => parseData(a.r[4]) - parseData(b.r[4]));
-  tbody.innerHTML = ordinati.map(({r, i:idx}) => {
+  tbody.innerHTML = ordinati.map(({r, i:idx}, pos) => {
     const sessoClass = r[5]==='F1'||r[5]==='FA' ? 'b-warn' : r[5]==='M1'||r[5]==='MA' ? 'b-ok' : 'b-info';
     return `<tr id="ab-row-${idx}">
-      <td style="font-family:var(--mono);font-size:11px">${r[0]}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text-faint)">${pos+1}</td>
       <td>${r[1]}</td>
       <td>${r[2]}</td>
       <td style="font-family:var(--mono);font-size:11px">${r[3]||'-'}</td>
@@ -1332,17 +1331,16 @@ function salvaTipo(idx, val){
 function renderDashAbbattimenti(){
   const dash = document.getElementById('dash-tbody-abbattimenti');
   if(!dash) return;
-  const ultimi = [...ABBATTIMENTI].slice(-5).reverse();
+  // Ultimi 5 per data
+  const ultimi = [...ABBATTIMENTI].sort((a,b)=>parseData(b[4])-parseData(a[4])).slice(0,5);
   const sessoClass = s => s==='F1'||s==='FA' ? 'b-warn' : s==='M1'||s==='MA' ? 'b-ok' : 'b-info';
   dash.innerHTML = ultimi.map(r=>`<tr>
-    <td style="font-family:var(--mono);font-size:11px">${r[0]}</td>
     <td>${r[1]}</td>
     <td style="font-family:var(--mono);font-size:11px">${r[4]}</td>
     <td><span class="badge ${sessoClass(r[5])}">${r[5]}</span></td>
     <td>${tipoBadge(r[6])}</td>
     <td><span class="fasc-chip">${r[7]}</span></td>
   </tr>`).join('');
-  // aggiorna contatore
   const mc = document.getElementById('dash-abbattimenti');
   if(mc) mc.textContent = ABBATTIMENTI.length;
 }
