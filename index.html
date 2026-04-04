@@ -463,7 +463,7 @@
       </div>
       <div class="card">
         <div class="table-wrap">
-          <table id="tab-uscite"><thead><tr><th>Controllore</th><th>Località</th><th>Posta</th><th>Luce</th><th>Arma</th><th style="cursor:pointer" onclick="sortUscite()" title="Ordina">Data ↕</th><th>Orario</th></tr></thead><tbody id="tbody-uscite">
+          <table id="tab-uscite"><thead><tr><th>Controllore</th><th>Località</th><th>Posta</th><th>Luce</th><th>Arma</th><th style="cursor:pointer" onclick="sortUscite()" title="Ordina">Data ↕</th><th>Orario</th><th></th></tr></thead><tbody id="tbody-uscite">
             </tbody></table>
         </div>
       </div>
@@ -488,15 +488,8 @@
     <div id="biometria" class="section">
       <div class="card">
         <div class="table-wrap">
-          <table><thead><tr><th>N.</th><th>Cacciatore</th><th>Località</th><th>Data</th><th>Sex</th><th>LTT</th><th>Peso P.</th><th>Peso V.</th></tr></thead><tbody>
-            <tr><td>1</td><td>Padoin Giorgio</td><td>sel. - Montecorno</td><td>03/01/26</td><td><span class="badge b-warn">FA</span></td><td>131</td><td>79</td><td>65.95</td></tr>
-            <tr><td>2</td><td>Padoin Giorgio</td><td>sel. - Montecorno</td><td>03/01/26</td><td><span class="badge b-info">F1</span></td><td>103</td><td>33.5</td><td>27.46</td></tr>
-            <tr><td>3</td><td>Padoin Giorgio</td><td>sel. - Montecorno</td><td>03/01/26</td><td><span class="badge b-warn">FA</span></td><td>149</td><td>87</td><td>72.71</td></tr>
-            <tr><td>4</td><td>Bottarel Federico</td><td>sel. - Serre</td><td>07/01/26</td><td><span class="badge b-warn">FA</span></td><td>161</td><td>136</td><td>101.1</td></tr>
-            <tr><td>5</td><td>Padoin Giorgio</td><td>sel. - Castel</td><td>07/01/26</td><td><span class="badge b-warn">FA</span></td><td>133</td><td>83.56</td><td>70</td></tr>
-            <tr><td>6</td><td>Santin Daniele</td><td>TENADA - Feltre</td><td>19/01/26</td><td><span class="badge b-ok">M1</span></td><td>112</td><td>45.5</td><td>33</td></tr>
-            <tr><td>7</td><td>Gugel Andreino</td><td>CASELLA - Farandin</td><td>24/01/26</td><td><span class="badge b-warn">FA</span></td><td>136</td><td>79</td><td>63</td></tr>
-          </tbody></table>
+          <table><thead><tr><th>N.</th><th>Cacciatore</th><th>Località</th><th>Data</th><th>Sex</th><th>LTT</th><th>Peso P.</th><th>Peso V.</th><th></th></tr></thead>
+          <tbody id="tbody-biometria"></tbody></table>
         </div>
       </div>
     </div>
@@ -764,10 +757,10 @@
             </div>
 
             <div class="form-row">
-              <div class="form-group"><label>Peso pieno (kg)</label><input type="number" step="0.01"/></div>
-              <div class="form-group"><label>Peso vuoto (kg)</label><input type="number" step="0.01"/></div>
+              <div class="form-group"><label>Peso pieno (kg)</label><input type="number" step="0.01" id="bio-pesop"/></div>
+              <div class="form-group"><label>Peso vuoto (kg)</label><input type="number" step="0.01" id="bio-pesov"/></div>
             </div>
-            <button class="btn btn-primary">Salva biometria</button>
+            <button class="btn btn-primary" onclick="salvaBiometria()">Salva biometria</button>
           </div>
         </div>
       </div>
@@ -860,6 +853,7 @@ function show(id, btn){
   document.getElementById('page-title').textContent = TITLES[id]||id;
   if(id==='abbattimenti') renderAbbattimenti();
   if(id==='uscite') renderUscite();
+  if(id==='biometria') renderBiometria();
   if(id==='dashboard'){ renderDashAbbattimenti(); renderDashUscite(); }
 }
 
@@ -1571,7 +1565,7 @@ function mostraSync(msg, tipo){
 async function caricaDaCloud(){
   mostraSync('Caricamento dati...', 'info');
   try {
-    const tabs = ['abbattimenti','stock','disc'];
+    const tabs = ['abbattimenti','stock','disc','biometria','uscite','stagione'];
     const results = await Promise.all(tabs.map(t =>
       fetch(`${GS_URL}?tabella=${t}`).then(r=>r.json())
     ));
@@ -1583,12 +1577,24 @@ async function caricaDaCloud(){
         if(e && disc) e[2] = disc;
       });
     }
+    if(results[3].righe && results[3].righe.length) BIOMETRIA = results[3].righe;
+    if(results[4].righe && results[4].righe.length) USCITE = results[4].righe;
+    if(results[5].righe && results[5].righe.length){
+      const s = results[5].righe[0];
+      if(s && s[0]){
+        const el = document.getElementById('stagione-label');
+        if(el) el.textContent = 'Stagione ' + s[0];
+        document.title = 'Gestionale Caccia al Cinghiale ' + s[0];
+      }
+    }
     mostraSync('Dati aggiornati', 'ok');
   } catch(err) {
     mostraSync('Errore caricamento - lavoro offline', 'err');
   }
   renderErad(); renderBlocchi(); renderStock();
   renderAbbattimenti(); renderDashAbbattimenti();
+  renderBiometria(); renderUscite(); renderDashUscite();
+  popolaBioSelect();
 }
 
 async function salvaSuCloud(tabella, dati){
@@ -1694,8 +1700,8 @@ function salvaStagione(input){
   const el = document.getElementById('stagione-label');
   el.textContent = val ? 'Stagione ' + val : 'Stagione 2025 / 2026';
   el.onclick = editStagione;
-  // Also update title
   document.title = 'Gestionale Caccia al Cinghiale ' + (val||'2025/2026');
+  salvaSuCloud('stagione', [[val||'2025/2026']]);
 }
 
 // ---- ID eradicatore editable ----
@@ -1760,10 +1766,11 @@ let USCITE = [...USCITE_INIT];
 function renderUscite(){
   const tbody = document.getElementById('tbody-uscite');
   if(!tbody) return;
-  tbody.innerHTML = USCITE.map(r=>{
+  tbody.innerHTML = USCITE.map((r,i)=>{
     const luce = r[3]==='FARO'
       ? `<span class="badge b-warn">FARO</span>`
-      : `<span class="badge b-info">VISORE</span>`;
+      : r[3]==='VISORE' ? `<span class="badge b-info">VISORE</span>`
+      : `<span class="badge b-gray">${r[3]||'-'}</span>`;
     return `<tr>
       <td>${r[0]}</td><td>${r[1]}</td>
       <td style="font-family:var(--mono);font-size:11px">${r[2]||'volante'}</td>
@@ -1771,9 +1778,11 @@ function renderUscite(){
       <td style="font-size:12px">${r[4]}</td>
       <td style="font-family:var(--mono);font-size:11px">${r[5]}</td>
       <td style="font-family:var(--mono);font-size:11px">${r[6]}</td>
+      <td style="white-space:nowrap;">
+        <button onclick="eliminaUscita(${i})" title="Elimina" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:14px;padding:2px 4px;">✕</button>
+      </td>
     </tr>`;
   }).join('');
-  // Update metrics
   const tot = USCITE.length;
   const faro = USCITE.filter(u=>u[3]==='FARO').length;
   const visore = USCITE.filter(u=>u[3]==='VISORE').length;
@@ -1785,6 +1794,71 @@ function renderUscite(){
   if(el('m-volanti-usc')) el('m-volanti-usc').textContent = volanti;
 }
 
+function eliminaUscita(i){
+  if(!confirm(`Eliminare l'uscita di ${USCITE[i][0]} del ${USCITE[i][5]}?`)) return;
+  USCITE.splice(i,1);
+  renderUscite();
+  renderDashUscite();
+  salvaSuCloud('uscite', USCITE);
+}
+
+// ---- Biometria ----
+// [n, cacciatore, localita, data, sesso, ltt, pesop, pesov]
+let BIOMETRIA = [];
+
+function renderBiometria(){
+  const tbody = document.getElementById('tbody-biometria');
+  if(!tbody) return;
+  const sorted = [...BIOMETRIA].sort((a,b)=>{
+    const da=a[3]?a[3].split('/').reverse().join(''):'';
+    const db=b[3]?b[3].split('/').reverse().join(''):'';
+    return da<db?-1:da>db?1:0;
+  });
+  tbody.innerHTML = sorted.map((r,pos)=>{
+    const sc = r[4]==='F1'||r[4]==='FA'?'b-warn':r[4]==='M1'||r[4]==='MA'?'b-ok':'b-info';
+    const origIdx = BIOMETRIA.indexOf(r);
+    return `<tr>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text-faint)">${pos+1}</td>
+      <td>${r[1]}</td><td>${r[2]}</td>
+      <td style="font-family:var(--mono);font-size:11px">${r[3]}</td>
+      <td><span class="badge ${sc}">${r[4]}</span></td>
+      <td style="font-family:var(--mono);font-size:11px">${r[5]||'-'}</td>
+      <td style="font-family:var(--mono);font-size:11px">${r[6]||'-'}</td>
+      <td style="font-family:var(--mono);font-size:11px">${r[7]||'-'}</td>
+      <td style="white-space:nowrap;">
+        <button onclick="eliminaBio(${origIdx})" title="Elimina" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:14px;padding:2px 4px;">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function eliminaBio(i){
+  if(!confirm(`Eliminare la registrazione biometrica di ${BIOMETRIA[i][1]}?`)) return;
+  BIOMETRIA.splice(i,1);
+  renderBiometria();
+  salvaSuCloud('biometria', BIOMETRIA);
+}
+
+function salvaBiometria(){
+  const cacciatore = document.getElementById('bio-cacciatore').value.trim();
+  const localita   = document.getElementById('bio-localita').value.trim();
+  const data       = document.getElementById('bio-data').value;
+  const sesso      = document.getElementById('bio-sesso').value;
+  const ltt        = document.getElementById('bio-ltt').value.trim();
+  const pesop      = document.getElementById('bio-pesop').value.trim();
+  const pesov      = document.getElementById('bio-pesov').value.trim();
+  if(!cacciatore||!data){ alert('Inserisci almeno cacciatore e data.'); return; }
+  const dataFmt = data.split('-').reverse().join('/');
+  BIOMETRIA.push([BIOMETRIA.length+1, cacciatore, localita, dataFmt, sesso, ltt, pesop, pesov]);
+  renderBiometria();
+  salvaSuCloud('biometria', BIOMETRIA);
+  // reset form
+  ['bio-cacciatore','bio-localita','bio-ltt','bio-pesop','bio-pesov'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('bio-data').value='';
+  document.getElementById('bio-sesso').value='FA';
+  const sel=document.querySelector('#t-biometria select');if(sel)sel.value='';
+  alert('Biometria salvata.');
+}
 
 function renderDashUscite(){
   const tbody = document.getElementById('dash-tbody-uscite');
@@ -1795,7 +1869,6 @@ function renderDashUscite(){
     return da<db?1:da>db?-1:0;
   }).slice(0,5);
   tbody.innerHTML = ultimi.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td style="font-family:var(--mono);font-size:11px">${r[5]}</td><td style="font-family:var(--mono);font-size:11px">${r[6]}</td></tr>`).join('');
-  // update dash metric
   const el = document.getElementById('dash-uscite-count');
   if(el) el.textContent = USCITE.length;
 }
@@ -1814,7 +1887,7 @@ function popolaBioSelect(){
   ABBATTIMENTI.forEach((ab,i)=>{
     const o = document.createElement('option');
     o.value = i;
-    o.textContent = `${ab[0]}. ${ab[1]} - ${ab[4]} (${ab[5]})`;
+    o.textContent = `${ab[1]} - ${ab[4]} (${ab[5]})`;
     sel.appendChild(o);
   });
 }
