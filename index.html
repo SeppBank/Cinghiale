@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -445,8 +446,7 @@
       </div>
       <div class="card">
         <div class="table-wrap">
-          <table id="tab-post"><thead><tr><th>Cacciatore</th><th>Località</th><th>Posta</th><th>Luce</th><th>Arma</th><th>Lat</th><th>Lon</th></tr></thead><tbody id="tbody-postazioni"></tbody></table>
-            </tbody></table>
+          <table id="tab-post"><thead><tr><th>Cacciatore</th><th>Località</th><th>Posta</th><th>Luce</th><th>Arma</th><th style="cursor:pointer" onclick="sortPostazioni('lat')" title="Ordina per lat">Lat ↕</th><th>Lon</th></tr></thead><tbody id="tbody-postazioni"></tbody></table>
         </div>
       </div>
     </div>
@@ -1377,7 +1377,7 @@ let ABBATTIMENTI = [
   [3,'Padoin Giorgio','Montecorno','','03/01/2026','FA','selezione','1973'],
   [4,'Bottarel Federico','Roccolo','','07/01/2026','FA','selezione','1498'],
   [5,'Padoin Giorgio','Castel','','07/01/2026','FA','selezione','1977'],
-  [6,'Damuzzo Davide','Acqua salsa','2030','27/01/2026','FA','fissa','1979'],
+  [6,'Pollazzon Mauro','MILIANA - Miotto','2005b','07/01/2026','MA','fissa','1478'],
   [7,'Santin Daniele','TENADA - Feltre','2051','19/01/2026','M1','fissa','1970'],
   [8,'Pederiva Domenico','Versante nord','','31/01/2026','FA','volante','1986'],
 ];
@@ -1615,24 +1615,71 @@ function salvaDiscCloud(){
 
 
 // ---- Render postazioni (dynamic from POSTAZIONI_MAP) ----
+// ---- Postazioni table with inline lat/lon editing ----
+let _postSortField = 'nome', _postSortDir = 1;
+
+function sortPostazioni(field){
+  if(_postSortField === field) _postSortDir *= -1;
+  else { _postSortField = field; _postSortDir = 1; }
+  renderPostazioniTable();
+}
+
 function renderPostazioniTable(){
   const tbody = document.getElementById('tbody-postazioni');
   if(!tbody) return;
   const rows = [];
-  Object.entries(POSTAZIONI_MAP).sort((a,b)=>a[0].localeCompare(b[0])).forEach(([nome, posti])=>{
-    posti.forEach(p=>{
-      rows.push(`<tr>
-        <td>${nome}</td>
-        <td>${p.l}</td>
-        <td style="font-family:var(--mono);font-size:11px">${p.p||'volante'}</td>
-        <td>${p.luce||'-'}</td>
-        <td style="font-size:12px">${p.arma||'-'}</td>
-        <td style="font-family:var(--mono);font-size:11px">${p.lat||'-'}</td>
-        <td style="font-family:var(--mono);font-size:11px">${p.lon||'-'}</td>
-      </tr>`);
-    });
+  // Flatten to array for sorting
+  const flat = [];
+  Object.entries(POSTAZIONI_MAP).forEach(([nome, posti])=>{
+    posti.forEach((p, pi)=>{ flat.push({nome, p, pi}); });
+  });
+  flat.sort((a,b)=>{
+    let va, vb;
+    if(_postSortField==='lat'){ va=parseFloat(a.p.lat)||0; vb=parseFloat(b.p.lat)||0; }
+    else { va=a.nome; vb=b.nome; }
+    return (va<vb?-1:va>vb?1:0)*_postSortDir;
+  });
+
+  flat.forEach(({nome, p, pi})=>{
+    const latStyle = p.lat ? '' : 'color:var(--text-faint);';
+    const lonStyle = p.lon ? '' : 'color:var(--text-faint);';
+    const nomeSafe = nome.replace(/'/g,"\\'");
+    rows.push(`<tr>
+      <td>${nome}</td>
+      <td>${p.l}</td>
+      <td style="font-family:var(--mono);font-size:11px">${p.p||'volante'}</td>
+      <td>${p.luce||'-'}</td>
+      <td style="font-size:12px">${p.arma||'-'}</td>
+      <td style="font-family:var(--mono);font-size:11px;${latStyle}cursor:pointer;border-bottom:1px dashed var(--border-strong);"
+          onclick="editCoord(this,'${nomeSafe}',${pi},'lat')"
+          title="Clicca per modificare">${p.lat||'— inserire'}</td>
+      <td style="font-family:var(--mono);font-size:11px;${lonStyle}cursor:pointer;border-bottom:1px dashed var(--border-strong);"
+          onclick="editCoord(this,'${nomeSafe}',${pi},'lon')"
+          title="Clicca per modificare">${p.lon||'— inserire'}</td>
+    </tr>`);
   });
   tbody.innerHTML = rows.join('');
+}
+
+function editCoord(cell, nome, pi, field){
+  if(cell.querySelector('input')) return;
+  const entry = (POSTAZIONI_MAP[nome]||[])[pi];
+  if(!entry) return;
+  const cur = entry[field] || '';
+  cell.innerHTML = `<input type="text" value="${cur}"
+    placeholder="es. 45.931325"
+    style="font-family:var(--mono);font-size:11px;padding:2px 6px;border:1px solid var(--accent);border-radius:4px;background:var(--surface);color:var(--text);width:110px;"
+    onblur="salvaCoord(this,'${nome.replace(/'/g,"\\'")}',${pi},'${field}')"
+    onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')renderPostazioniTable();" />`;
+  cell.querySelector('input').focus();
+  cell.querySelector('input').select();
+}
+
+function salvaCoord(input, nome, pi, field){
+  const val = input.value.trim();
+  const entry = (POSTAZIONI_MAP[nome]||[])[pi];
+  if(entry){ entry[field] = val; }
+  renderPostazioniTable();
 }
 
 // ---- Stagione editable ----
