@@ -794,6 +794,7 @@
           <div style="display:flex;gap:8px;">
             <button class="btn btn-secondary" onclick="anteprima()">Anteprima</button>
             <button class="btn btn-primary" onclick="inviaWA()" style="background:#25D366;border-color:#25D366;color:#fff;">Apri WhatsApp</button>
+            <button class="btn btn-secondary" onclick="pulisciWA()">Pulisci</button>
           </div>
         </div>
       </div>
@@ -1153,6 +1154,14 @@ function selezionaPostazione(idx, nome){
     document.getElementById('in-toponimo-volante').value='';
     document.getElementById('in-lat-volante').value='';
     document.getElementById('in-lon-volante').value='';
+    // Auto-imposta luce dalla postazione
+    if(p.luce){
+      const selLuce = document.getElementById('in-luce');
+      if(selLuce){
+        const opt = [...selLuce.options].find(o=>o.value===p.luce);
+        if(opt) selLuce.value = p.luce;
+      }
+    }
   }
   rest.style.display='block';
 }
@@ -2055,6 +2064,13 @@ function inviaWA(){
 }
 
 // Set today as default date for WhatsApp
+function pulisciWA(){
+  initWADate();
+  document.getElementById('wa-dest').value='';
+  document.getElementById('wa-preview').style.display='none';
+  document.getElementById('wa-preview').textContent='';
+}
+
 function initWADate(){
   const el = document.getElementById('wa-data');
   if(!el) return;
