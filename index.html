@@ -1,0 +1,2038 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Gestionale Caccia al Cinghiale 2025/2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+  :root {
+    --bg: #f7f5f0;
+    --surface: #ffffff;
+    --surface2: #f0ede6;
+    --border: #ddd9d0;
+    --border-strong: #c5c0b5;
+    --text: #1a1815;
+    --text-muted: #7a756c;
+    --text-faint: #b0aa9e;
+    --accent: #2d5a27;
+    --accent-light: #e8f0e6;
+    --danger: #8b2020;
+    --danger-light: #f5e8e8;
+    --warn: #7a5a10;
+    --warn-light: #faf0d8;
+    --info: #1a3d5c;
+    --info-light: #e6eef5;
+    --ok: #1e5c32;
+    --ok-light: #e6f2ea;
+    --mono: 'DM Mono', monospace;
+    --sans: 'DM Sans', sans-serif;
+    --radius: 6px;
+    --radius-lg: 10px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: var(--sans);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+
+  /* LAYOUT */
+  .shell { display: flex; min-height: 100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: var(--text);
+    color: #f0ede6;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    position: fixed;
+    top: 0; left: 0; bottom: 0;
+    z-index: 100;
+  }
+  .sidebar-header {
+    padding: 24px 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .sidebar-logo {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.4);
+    margin-bottom: 6px;
+  }
+  .sidebar-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: #f0ede6;
+    line-height: 1.3;
+  }
+  .sidebar-season {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(255,255,255,0.35);
+    margin-top: 4px;
+  }
+  .nav-group { padding: 16px 12px 8px; }
+  .nav-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.25);
+    padding: 0 8px;
+    margin-bottom: 4px;
+  }
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 10px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    font-size: 13px;
+    color: rgba(255,255,255,0.6);
+    transition: all .15s;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+  }
+  .nav-item:hover { background: rgba(255,255,255,0.06); color: #f0ede6; }
+  .nav-item.active { background: var(--accent); color: #fff; font-weight: 500; }
+  .nav-item .ico { font-size: 15px; width: 18px; text-align: center; }
+  .nav-item .badge-nav {
+    margin-left: auto;
+    background: var(--danger);
+    color: #fff;
+    font-size: 10px;
+    font-family: var(--mono);
+    padding: 1px 6px;
+    border-radius: 99px;
+    min-width: 18px;
+    text-align: center;
+  }
+
+  /* MAIN */
+  .main {
+    margin-left: 220px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 32px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+  .page-title { font-size: 16px; font-weight: 500; }
+  .page-subtitle { font-size: 12px; color: var(--text-muted); margin-left: auto; font-family: var(--mono); }
+
+  .content { padding: 28px 32px; flex: 1; }
+
+  /* SECTION */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* METRICS */
+  .metrics {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .metric {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+  }
+  .metric .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  .metric .val { font-family: var(--mono); font-size: 26px; font-weight: 500; }
+  .metric .val.danger { color: var(--danger); }
+  .metric .val.ok { color: var(--ok); }
+
+  /* CARDS */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    margin-bottom: 20px;
+  }
+  .card-head {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-head h3 { font-size: 13px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); }
+  .card-body { padding: 20px; }
+
+  /* TABLES */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th {
+    text-align: left;
+    padding: 7px 12px;
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+    background: var(--surface2);
+    white-space: nowrap;
+  }
+  tbody td { padding: 5px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover { background: var(--bg); }
+
+  /* BADGES */
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    font-family: var(--mono);
+  }
+  .b-ok { background: var(--ok-light); color: var(--ok); }
+  .b-danger { background: var(--danger-light); color: var(--danger); }
+  .b-warn { background: var(--warn-light); color: var(--warn); }
+  .b-info { background: var(--info-light); color: var(--info); }
+  .b-gray { background: var(--surface2); color: var(--text-muted); }
+
+  /* ALERTS */
+  .alert {
+    padding: 12px 16px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    margin-bottom: 12px;
+    border-left: 3px solid;
+  }
+  .alert-danger { background: var(--danger-light); border-color: var(--danger); color: var(--danger); }
+  .alert-warn { background: var(--warn-light); border-color: var(--warn); color: var(--warn); }
+  .alert-ok { background: var(--ok-light); border-color: var(--ok); color: var(--ok); }
+  .alert-info { background: var(--info-light); border-color: var(--info); color: var(--info); }
+  .alert ul { margin: 6px 0 0 16px; }
+  .alert strong { font-weight: 600; }
+
+  /* FORMS */
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .form-row.full { grid-template-columns: 1fr; }
+  .form-group label { display: block; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .06em; color: var(--text-muted); margin-bottom: 5px; }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 13px;
+    font-family: var(--sans);
+    transition: border-color .15s;
+  }
+  .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+  .form-group textarea { resize: vertical; }
+
+  /* BUTTONS */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 20px;
+    border-radius: var(--radius);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all .15s;
+    font-family: var(--sans);
+    border: 1px solid transparent;
+  }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: #234d1f; }
+  .btn-secondary { background: var(--surface2); color: var(--text); border-color: var(--border); }
+  .btn-secondary:hover { border-color: var(--border-strong); }
+  .btn-danger { background: var(--danger-light); color: var(--danger); border-color: var(--danger); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* TABS */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 24px; }
+  .tab {
+    padding: 10px 20px;
+    font-size: 13px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all .15s;
+    font-family: var(--sans);
+  }
+  .tab:hover { color: var(--text); }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 500; }
+  .tab-body { display: none; }
+  .tab-body.active { display: block; }
+
+  /* SEARCH */
+  .search-wrap { display: flex; gap: 10px; margin-bottom: 16px; align-items: center; }
+  .search-input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    background: var(--surface);
+    color: var(--text);
+  }
+  .search-input:focus { outline: none; border-color: var(--accent); }
+
+  /* STOCK PILLS */
+  .stock-grid { display: flex; flex-wrap: wrap; gap: 6px; min-height: 36px; }
+  .stock-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 12px;
+  }
+  .stock-chip .rm {
+    cursor: pointer;
+    color: var(--text-faint);
+    font-size: 14px;
+    line-height: 1;
+  }
+  .stock-chip .rm:hover { color: var(--danger); }
+
+  /* BLOCCHI DASHBOARD */
+  .blocchi-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 24px; }
+  .blocco-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+  }
+  .blocco-card.danger { border-left: 3px solid var(--danger); }
+  .blocco-card.warn { border-left: 3px solid var(--warn); }
+  .blocco-head { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; margin-bottom: 10px; }
+  .blocco-head.danger { color: var(--danger); }
+  .blocco-head.warn { color: var(--warn); }
+  .blocco-list { font-size: 12px; color: var(--text-muted); line-height: 1.8; }
+
+  /* DIVIDER */
+  .divider { height: 1px; background: var(--border); margin: 20px 0; }
+
+  /* FASCETTE INLINE */
+  .fasc-chip {
+    display: inline-block;
+    padding: 2px 8px;
+    background: var(--info-light);
+    color: var(--info);
+    border-radius: 4px;
+    font-family: var(--mono);
+    font-size: 11px;
+    margin: 2px;
+  }
+
+  @media (max-width: 768px) {
+    .sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; }
+    .main { margin-left: 0; }
+    .blocchi-grid { grid-template-columns: 1fr; }
+    .form-row { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="sidebar-logo">Caccia al Cinghiale</div>
+    <div class="sidebar-title">Gestionale</div>
+    <div class="sidebar-season" id="stagione-label" onclick="editStagione()" title="Clicca per modificare" style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,0.2);">Stagione 2025 / 2026</div>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Generale</div>
+    <button class="nav-item active" onclick="show('dashboard',this)"><span class="ico">◈</span> Riepilogo</button>
+    <button class="nav-item" onclick="show('postazioni',this)"><span class="ico">⌖</span> Postazioni</button>
+    <button class="nav-item" onclick="show('uscite',this)"><span class="ico">↗</span> Uscite</button>
+    <button class="nav-item" onclick="show('abbattimenti',this)"><span class="ico">◎</span> Abbattimenti</button>
+    <button class="nav-item" onclick="show('biometria',this)"><span class="ico">≈</span> Biometria</button>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Eradicatori</div>
+    <button class="nav-item" onclick="show('eradicatori',this)"><span class="ico">✦</span> Abilitati <span class="badge-nav" id="badge-bloccati">—</span></button>
+    <button class="nav-item" onclick="show('magazzino',this)"><span class="ico">⊞</span> Fascette</button>
+  </div>
+  <div class="nav-group">
+    <div class="nav-label">Operazioni</div>
+    <button class="nav-item" onclick="show('aggiungi',this)"><span class="ico">+</span> Aggiungi</button>
+    <button class="nav-item" onclick="show('whatsapp',this)"><span class="ico">✉</span> WhatsApp</button>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+  <div class="topbar">
+    <span class="page-title" id="page-title">Riepilogo</span>
+    <span class="page-subtitle" id="page-date"></span>
+  </div>
+  <div class="content">
+
+    <!-- ===== DASHBOARD ===== -->
+    <div id="dashboard" class="section active">
+      <div class="metrics">
+        <div class="metric"><div class="lbl">Postazioni</div><div class="val">55</div></div>
+        <div class="metric"><div class="lbl">Uscite</div><div class="val" id="dash-uscite-count">—</div></div>
+        <div class="metric"><div class="lbl">Abbattimenti</div><div class="val" id="dash-abbattimenti">—</div></div>
+        <div class="metric"><div class="lbl">Eradicatori</div><div class="val">50</div></div>
+        <div class="metric"><div class="lbl">Fascette assegnate</div><div class="val">89</div></div>
+        <div class="metric"><div class="lbl">Fascette usate</div><div class="val">46</div></div>
+        <div class="metric"><div class="lbl">Fascette in giacenza</div><div class="val" id="dash-stock">0</div></div>
+        <div class="metric"><div class="lbl">Bloccati</div><div class="val danger" id="dash-bloccati">—</div></div>
+      </div>
+
+      <div class="blocchi-grid" id="blocchi-grid"></div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+        <div class="card">
+          <div class="card-head"><h3>Ultimi abbattimenti</h3></div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Cacciatore</th><th>Data</th><th>Sex</th><th>Tipo</th><th>Fascetta</th></tr></thead>
+            <tbody id="dash-tbody-abbattimenti"></tbody></table>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-head"><h3>Ultime uscite</h3></div>
+          <div class="table-wrap">
+            <table><thead><tr><th>Controllore</th><th>Località</th><th>Data</th><th>Orario</th></tr></thead>
+            <tbody id="dash-tbody-uscite"></tbody></table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== POSTAZIONI ===== -->
+    <div id="postazioni" class="section">
+      <div class="search-wrap">
+        <input class="search-input" type="text" placeholder="Cerca per nome o località..." oninput="filterTable('tab-post',this.value)"/>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table id="tab-post"><thead><tr><th>Cacciatore</th><th>Località</th><th>Posta</th><th>Luce</th><th>Arma</th><th style="cursor:pointer" onclick="sortPostazioni('lat')" title="Ordina per lat">Lat ↕</th><th>Lon</th></tr></thead><tbody id="tbody-postazioni"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== USCITE ===== -->
+    <div id="uscite" class="section">
+      <div class="metrics" style="margin-bottom:16px;">
+        <div class="metric"><div class="lbl">Totale uscite</div><div class="val" id="m-uscite">71</div></div>
+        <div class="metric"><div class="lbl">Con FARO</div><div class="val" id="m-faro">0</div></div>
+        <div class="metric"><div class="lbl">Con VISORE</div><div class="val" id="m-visore">0</div></div>
+        <div class="metric"><div class="lbl">Volanti</div><div class="val" id="m-volanti-usc">0</div></div>
+      </div>
+      <div class="search-wrap">
+        <input class="search-input" type="text" placeholder="Cerca controllore o località..." oninput="filterTable('tab-uscite',this.value)"/>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table id="tab-uscite"><thead><tr><th>Controllore</th><th>Località</th><th>Posta</th><th>Luce</th><th>Arma</th><th style="cursor:pointer" onclick="sortUscite()" title="Ordina">Data ↕</th><th>Orario</th><th></th></tr></thead><tbody id="tbody-uscite">
+            </tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ABBATTIMENTI ===== -->
+    <div id="abbattimenti" class="section">
+      <div class="card">
+        <div class="table-wrap">
+          <table><thead><tr><th>N.</th><th>Cacciatore</th><th>Località</th><th>Posta</th><th style="cursor:pointer;" onclick="sortAbbattimenti(4)" title="Ordina per data">Data ↕</th><th>Sesso</th><th>Tipo</th><th>Fascetta</th><th></th></tr></thead>
+          <tbody id="tbody-abbattimenti"></tbody></table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Ripartizione statistica</h3></div>
+        <div class="card-body" id="stats-abbattimenti" style="display:grid;grid-template-columns:1fr;gap:10px;"></div>
+      </div>
+    </div>
+
+    <!-- ===== BIOMETRIA ===== -->
+    <div id="biometria" class="section">
+      <div class="card">
+        <div class="table-wrap">
+          <table><thead><tr><th>N.</th><th>Cacciatore</th><th>Località</th><th>Data</th><th>Sex</th><th>LTT</th><th>Peso P.</th><th>Peso V.</th><th></th></tr></thead>
+          <tbody id="tbody-biometria"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== ERADICATORI ===== -->
+    <div id="eradicatori" class="section">
+      <div class="metrics">
+        <div class="metric"><div class="lbl">Totale</div><div class="val">50</div></div>
+        <div class="metric"><div class="lbl">Abilitati</div><div class="val ok" id="m-abilitati">—</div></div>
+        <div class="metric"><div class="lbl">Bloccati</div><div class="val danger" id="m-bloccati">—</div></div>
+        <div class="metric"><div class="lbl">Senza fascetta</div><div class="val" id="m-senzaf">—</div></div>
+      </div>
+      <div class="search-wrap">
+        <input class="search-input" type="text" placeholder="Cerca eradicatore..." oninput="filtroErad(this.value)"/>
+        <select onchange="filtroEradStato(this.value)" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font-size:13px;color:var(--text);">
+          <option value="">Tutti</option>
+          <option value="ok">Abilitati</option>
+          <option value="blocco">Bloccati</option>
+          <option value="nofasc">Senza fascetta</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="table-wrap">
+          <table><thead><tr><th>ID</th><th>Eradicatore</th><th>Disciplinare</th><th>Fascette assegnate</th><th>Disponibili</th><th>Stato</th></tr></thead>
+          <tbody id="tbody-erad"></tbody></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== MAGAZZINO ===== -->
+    <div id="magazzino" class="section">
+      <div class="metrics">
+        <div class="metric"><div class="lbl">In giacenza</div><div class="val" id="m-stock">0</div></div>
+        <div class="metric"><div class="lbl">Assegnate</div><div class="val">43</div></div>
+        <div class="metric"><div class="lbl">Usate (abbattimenti)</div><div class="val">46</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Carica nuove fascette</h3></div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">Inserisci i numeri delle fascette in giacenza separati da virgola oppure uno per riga.</p>
+          <div class="form-row full">
+            <div class="form-group">
+              <label>Numeri fascette</label>
+              <textarea id="input-stock" rows="3" placeholder="es. 2001, 2002, 2003&#10;oppure uno per riga"></textarea>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="aggiungiStock()">Aggiungi al magazzino</button>
+          <div id="stock-feedback" style="margin-top:10px;"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Fascette in giacenza</h3></div>
+        <div class="card-body">
+          <div class="stock-grid" id="stock-list"><span style="font-size:13px;color:var(--text-faint)">Nessuna fascetta in giacenza.</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>Assegna fascetta a eradicatore</h3></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Eradicatore</label>
+              <select id="sel-dest"><option value="">— seleziona —</option></select>
+            </div>
+            <div class="form-group">
+              <label>N. fascetta</label>
+              <select id="sel-fasc-stock"><option value="">— seleziona —</option></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Data consegna</label>
+              <input type="date" id="data-assegna"/>
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="assegnaFascetta()">Assegna</button>
+          <div id="assegna-feedback" style="margin-top:10px;"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== AGGIUNGI ===== -->
+    <div id="aggiungi" class="section">
+      <div class="tabs">
+        <button class="tab active" onclick="switchTab('t-uscita',this)">Prenotazione uscita</button>
+        <button class="tab" onclick="switchTab('t-abbattimento',this)">Abbattimento</button>
+        <button class="tab" onclick="switchTab('t-biometria',this)">Biometria</button>
+        <button class="tab" onclick="switchTab('t-importa',this)">Importa abbattimenti</button>
+      </div>
+
+      <!-- IMPORTAZIONE MASSIVA -->
+      <div id="t-importa" class="tab-body">
+        <div class="card">
+          <div class="card-head"><h3>Importa abbattimenti da tabella</h3></div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:6px;">Copia le righe dal tuo file Excel e incollale qui sotto. Il sistema legge le colonne nell'ordine che vedi nel modello.</p>
+            <div style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;font-family:var(--mono);font-size:11px;color:var(--text-muted);line-height:2;">
+              Cacciatore &nbsp;|&nbsp; Località &nbsp;|&nbsp; Posta &nbsp;|&nbsp; Data (gg/mm/aaaa) &nbsp;|&nbsp; Sesso &nbsp;|&nbsp; Tipo (<strong>fissa</strong> / <strong>volante</strong> / <strong>selezione</strong>) &nbsp;|&nbsp; N. fascetta
+            </div>
+            <div class="form-row full" style="margin-bottom:6px;">
+              <div class="form-group">
+                <label>Incolla le righe Excel (una per riga, colonne separate da tabulazione o punto e virgola)</label>
+                <textarea id="import-textarea" rows="8" style="font-family:var(--mono);font-size:12px;" placeholder="Padoin Giorgio&#9;selezione - Montecorno&#9;&#9;03/01/2026&#9;FA&#9;selezione&#9;1975&#10;Bottarel Federico&#9;selezione - Roccolo&#9;&#9;07/01/2026&#9;FA&#9;selezione&#9;1498"></textarea>
+              </div>
+            </div>
+            <div style="display:flex;gap:8px;margin-bottom:10px;">
+              <button class="btn btn-primary" onclick="importaAbbattimenti()">Importa</button>
+              <button class="btn btn-secondary" onclick="document.getElementById('import-textarea').value='';document.getElementById('import-preview').innerHTML='';">Pulisci</button>
+            </div>
+            <div id="import-feedback"></div>
+            <div id="import-preview"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PRENOTAZIONE USCITA -->
+      <div id="t-uscita" class="tab-body active">
+        <div class="card">
+          <div class="card-head"><h3>Verifica abilitazione</h3></div>
+          <div class="card-body">
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;">Seleziona l'eradicatore: il sistema verificherà disciplinare e fascetta disponibile prima di procedere.</p>
+            <div class="form-row full">
+              <div class="form-group">
+                <label>Eradicatore</label>
+                <select id="sel-erad-uscita" onchange="verificaAbilitazione()"><option value="">— seleziona —</option></select>
+              </div>
+            </div>
+            <div id="esito-verifica"></div>
+          </div>
+        </div>
+
+        <div id="form-postazione" style="display:none;">
+          <div class="card">
+            <div class="card-head">
+              <h3>Seleziona postazione</h3>
+              <button class="btn btn-secondary" style="margin-left:auto;font-size:12px;padding:5px 12px;" onclick="toggleNuovaPostazione()">+ Aggiungi postazione</button>
+            </div>
+            <div class="card-body">
+              <p style="font-size:13px;color:var(--text-muted);margin-bottom:14px;">Postazioni assegnate all'eradicatore selezionato.</p>
+              <div id="postazioni-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;margin-bottom:16px;"></div>
+
+              <!-- form aggiungi nuova postazione (nascosto) -->
+              <div id="form-nuova-posta" style="display:none;border-top:1px solid var(--border);padding-top:16px;margin-top:4px;">
+                <p style="font-size:13px;font-weight:500;margin-bottom:12px;">Nuova postazione per <span id="lbl-erad-posta" style="color:var(--accent);"></span></p>
+                <div class="form-row">
+                  <div class="form-group"><label>Numero posta</label><input type="text" id="np-numero" placeholder="es. 2058"/></div>
+                  <div class="form-group"><label>Località</label><input type="text" id="np-localita" placeholder="es. CAMPEA - Nuova"/></div>
+                </div>
+                <div style="display:flex;gap:8px;">
+                  <button class="btn btn-primary" onclick="aggiungiPostazione()">Aggiungi</button>
+                  <button class="btn btn-secondary" onclick="toggleNuovaPostazione()">Annulla</button>
+                </div>
+                <div id="np-feedback" style="margin-top:8px;"></div>
+              </div>
+
+              <div id="postazione-selezionata" style="display:none;">
+                <div class="divider"></div>
+                <div style="display:flex;gap:24px;flex-wrap:wrap;margin-top:4px;">
+                  <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Posta n.</span><br><span id="info-posta" style="font-family:var(--mono);font-size:15px;font-weight:500;"></span></div>
+                  <div><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Località</span><br><span id="info-localita" style="font-size:14px;font-weight:500;"></span></div>
+                  <div id="info-volante-note" style="display:none;"><span style="font-size:11px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.05em;">Nota</span><br><span style="font-size:12px;color:var(--info);">Inserire toponimo e coordinate nel form</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="form-uscita-rest" style="display:none;">
+          <div class="card">
+            <div class="card-head"><h3>Dati uscita</h3></div>
+            <div class="card-body">
+              <div class="form-row" id="volante-zona-row" style="display:none;grid-template-columns:2fr 1fr 1fr;">
+                <div class="form-group"><label>Toponimo</label><input type="text" id="in-toponimo-volante" placeholder="es. Roccolo - Montecorno"/></div>
+                <div class="form-group"><label>Latitudine</label><input type="text" id="in-lat-volante" placeholder="es. 45.931325"/></div>
+                <div class="form-group"><label>Longitudine</label><input type="text" id="in-lon-volante" placeholder="es. 12.111725"/></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Luce</label><select id="in-luce"><option>VISORE</option><option>FARO</option><option>ALTRO</option></select></div>
+                <div class="form-group"><label>Arma</label><input type="text" id="in-arma" placeholder="es. bolt action Remington 7 RM"/></div>
+              </div>
+              <div class="form-row">
+                <div class="form-group"><label>Data uscita</label><input type="date" id="in-data-uscita"/></div>
+                <div class="form-group"><label>Orario</label><input type="text" id="in-orario" placeholder="17:00–23:00"/></div>
+              </div>
+              <button class="btn btn-primary" onclick="salvaUscita()">Salva uscita</button>
+              <div id="save-uscita-ok" style="margin-top:10px;"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ABBATTIMENTO -->
+      <div id="t-abbattimento" class="tab-body">
+        <div class="card">
+          <div class="card-head"><h3>Nuovo abbattimento</h3></div>
+          <div class="card-body">
+            <div class="form-row">
+              <div class="form-group"><label>Cacciatore</label><input id="ab-cacciatore" type="text" placeholder="Cognome Nome"/></div>
+              <div class="form-group"><label>Data</label><input id="ab-data" type="date"/></div>
+            </div>
+            <div class="form-row full">
+              <div class="form-group">
+                <label>Tipo abbattimento</label>
+                <select id="ab-tipo" onchange="toggleAbTipo()">
+                  <option value="fissa">Da postazione fissa</option>
+                  <option value="volante">Da volante</option>
+                  <option value="selezione">Selezione</option>
+                </select>
+              </div>
+            </div>
+            <!-- Posta fissa -->
+            <div id="ab-fissa-row" class="form-row">
+              <div class="form-group"><label>Posta n.</label><input id="ab-posta" type="text" placeholder="es. 2033"/></div>
+              <div class="form-group"><label>Località</label><input id="ab-localita-fissa" type="text" placeholder="es. PERTEGAR - Damin"/></div>
+            </div>
+            <!-- Volante -->
+            <div id="ab-volante-row" class="form-row" style="display:none;">
+              <div class="form-group"><label>Toponimo</label><input id="ab-toponimo" type="text" placeholder="es. Roccolo - Montecorno"/></div>
+              <div class="form-group"><label>Latitudine</label><input id="ab-lat" type="text" placeholder="es. 45.931325"/></div>
+              <div class="form-group"><label>Longitudine</label><input id="ab-lon" type="text" placeholder="es. 12.111725"/></div>
+            </div>
+            <!-- Selezione -->
+            <div id="ab-selezione-row" class="form-row" style="display:none;">
+              <div class="form-group" style="grid-column:1/-1;"><label>Località / zona di selezione</label><input id="ab-localita-sel" type="text" placeholder="es. selezione - Montecorno"/></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Sesso</label>
+                <select id="ab-sesso"><option value="FA">FA — femmina adulta</option><option value="F1">F1 — femmina giovane</option><option value="MA">MA — maschio adulto</option><option value="M1">M1 — maschio giovane</option></select>
+              </div>
+              <div class="form-group"><label>N. fascetta</label><input id="ab-fascetta" type="text" placeholder="es. 1975"/></div>
+            </div>
+            <div style="display:flex;gap:8px;align-items:center;">
+              <button class="btn btn-primary" onclick="salvaAbbattimento()">Salva abbattimento</button>
+              <button class="btn btn-secondary" onclick="resetAbbattimentoForm()">Pulisci</button>
+            </div>
+            <div id="ab-feedback" style="margin-top:10px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BIOMETRIA -->
+      <div id="t-biometria" class="tab-body">
+        <div class="card">
+          <div class="card-head"><h3>Rilevazione biometrica</h3></div>
+          <div class="card-body">
+            <div style="margin-bottom:12px;">
+              <label style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);">Importa da abbattimento</label>
+              <select onchange="if(this.value!='')autoPopBio(parseInt(this.value))" style="width:100%;margin-top:4px;padding:7px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);color:var(--text);font-size:13px;">
+                <option value="">-- seleziona abbattimento --</option>
+              </select>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Cacciatore</label><input type="text" id="bio-cacciatore"/></div>
+              <div class="form-group"><label>Località</label><input type="text" id="bio-localita"/></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>Data</label><input type="date" id="bio-data"/></div>
+              <div class="form-group"><label>Sesso</label><select id="bio-sesso"><option>FA</option><option>F1</option><option>MA</option><option>M1</option></select></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label>LTT (cm)</label><input type="number" id="bio-ltt"/></div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group"><label>Peso pieno (kg)</label><input type="number" step="0.01" id="bio-pesop"/></div>
+              <div class="form-group"><label>Peso vuoto (kg)</label><input type="number" step="0.01" id="bio-pesov"/></div>
+            </div>
+            <button class="btn btn-primary" onclick="salvaBiometria()">Salva biometria</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== WHATSAPP ===== -->
+    <div id="whatsapp" class="section">
+
+      <!-- Invio uscite -->
+      <div class="card">
+        <div class="card-head"><h3>Invia uscite su WhatsApp</h3></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Data uscite</label>
+              <input type="date" id="wa-data"/>
+            </div>
+            <div class="form-group">
+              <label>Destinatario</label>
+              <select id="wa-dest">
+                <option value="">— seleziona —</option>
+              </select>
+            </div>
+          </div>
+          <div id="wa-preview" style="background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px;font-size:13px;margin-bottom:14px;min-height:60px;white-space:pre-wrap;display:none;"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-secondary" onclick="anteprima()">Anteprima</button>
+            <button class="btn btn-primary" onclick="inviaWA()" style="background:#25D366;border-color:#25D366;color:#fff;">Apri WhatsApp</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Gestione destinatari -->
+      <div class="card">
+        <div class="card-head"><h3>Gestione destinatari</h3></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group"><label>Nome</label><input type="text" id="wa-nome" placeholder="es. Guardia Rossi"/></div>
+            <div class="form-group"><label>Numero WhatsApp</label><input type="text" id="wa-numero" placeholder="es. 393331234567"/></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:14px;">
+            <button class="btn btn-primary" onclick="aggiungiDestinatario()">Aggiungi</button>
+          </div>
+          <div id="wa-lista-dest"></div>
+          <div id="wa-dest-feedback" style="margin-top:8px;"></div>
+        </div>
+      </div>
+
+    </div>
+
+  </div><!-- /content -->
+</main>
+</div><!-- /shell -->
+
+<script>
+// ============================================================
+// DATI ERADICATORI
+// [id, nome, dataDisciplinare, [{n, c (consegna), u (utilizzo)}]]
+// ============================================================
+const ERADICATORI = [
+  [null,'ANDREOLA DIMITRI','28/04/2025',[{n:757,c:'28/04/2025',u:null}]],
+  [null,'BERNARDI JOHNNY JUNIOR','28/04/2025',[{n:761,c:'28/04/2025',u:'09/06/2026'},{n:763,c:'09/06/2025',u:null}]],
+  [1,'Bortolini Giuseppe','28/04/2025',[{n:1486,c:'08/08/2025',u:'30/01/2026'}]],
+  [2,'Bortolini Ivo','04/01/2026',[{n:1987,c:'04/01/2026',u:null}]],
+  [45,'Bottarel Federico','11/08/2025',[{n:1491,c:'08/08/2025',u:'10/09/2025'},{n:1498,c:'11/09/2025',u:'07/01/2026'},{n:1982,c:'08/01/2026',u:null}]],
+  [null,'CALLEGARI FRANCO',null,[]],
+  [3,'Codognotto Flavio','18/09/2025',[{n:1962,c:'18/09/2025',u:null}]],
+  [4,'Dal Vecchio Renato','28/04/2025',[{n:755,c:'28/04/2025',u:'20/06/2025'},{n:780,c:'22/06/2025',u:'23/07/2025'},{n:770,c:'24/07/2025',u:'05/08/2025'},{n:1482,c:'29/07/2025',u:null}]],
+  [5,"Dall'Antonia Mauro",'28/04/2025',[]],
+  [6,"Dall'Arche Samuele",'19/09/2025',[{n:1963,c:'19/09/2025',u:null}]],
+  [7,'Dalle Molle Valter','11/10/2025',[{n:1969,c:'11/10/2025',u:null}]],
+  [8,'Damuzzo Davide','26/05/2025',[{n:743,c:'26/05/2025',u:'29/11/2025'},{n:1971,c:'03/12/2025',u:'21/12/2025'},{n:1979,c:'03/01/2026',u:'27/01/2026'},{n:774,c:'18/07/2025',u:null}]],
+  [9,'Davanzo Paolo','28/04/2025',[{n:771,c:'30/05/2025',u:null}]],
+  [10,'De Biasi Beniamino','28/04/2025',[]],
+  [11,'De Biasi Franco','28/04/2025',[{n:1489,c:'08/08/2025',u:'21/12/2025'},{n:1972,c:'22/12/2025',u:null}]],
+  [12,'De Panni Roberto',null,[]],
+  [50,'Facci Federico','28/04/2025',[{n:750,c:'29/08/2025',u:'29/05/2025'},{n:1978,c:'03/01/2026',u:null}]],
+  [13,'Facci Michele','28/04/2025',[{n:749,c:'28/04/2026',u:null},{n:1488,c:'17/09/2025',u:'31/12/2025'}]],
+  [14,'Favalessa Massimiliano','28/04/2025',[{n:747,c:'28/04/2025',u:'01/08/2025'},{n:1490,c:'02/08/2025',u:'21/08/2025'},{n:1493,c:'22/08/2025',u:null}]],
+  [null,'FIABANE GIULIA','06/10/2025',[{n:768,c:'08/06/2025',u:'17/03/2026'},{n:1981,c:'03/01/2026',u:null}]],
+  [40,'Forelli Mario',null,[]],
+  [15,'Graiff Roberto','28/04/2025',[]],
+  [16,'Gugel Andreino','28/04/2025',[{n:1495,c:'28/04/2025',u:null}]],
+  [17,'Guizzo Paolo','27/02/2026',[{n:1988,c:'27/02/2026',u:null}]],
+  [18,'Guizzo Riccardo','28/04/2025',[{n:752,c:'28/04/2025',u:null}]],
+  [null,'GUSATTO PAOLO',null,[]],
+  [19,'Lazzari Pierluigi','16/05/2025',[{n:754,c:'16/05/2025',u:'06/08/2025'},{n:1483,c:'25/08/2025',u:'26/12/2025'},{n:1974,c:'26/12/2025',u:null}]],
+  [20,'Lodi Luigi','28/04/2025',[{n:765,c:'28/04/2025',u:'31/12/2025'},{n:779,c:'10/05/2025',u:null}]],
+  [22,'Nardi Ivan','18/09/2025',[{n:1961,c:'18/09/2025',u:'08/10/2025'},{n:1968,c:'09/10/2025',u:null}]],
+  [23,'Padoin Dimitri','28/04/2025',[{n:746,c:'28/04/2025',u:'27/06/2025'},{n:776,c:'02/07/2025',u:null},{n:773,c:'16/07/2025',u:'07/08/2025'},{n:777,c:'14/07/2025',u:'15/07/2025'},{n:1484,c:'17/08/2025',u:'31/12/2025'}]],
+  [46,'Padoin Giorgio','28/04/2025',[{n:753,c:'28/04/2025',u:'02/07/2025'},{n:1496,c:'17/08/2025',u:'02/09/2025'},{n:1500,c:'09/09/2025',u:'27/09/2025'},{n:1966,c:'01/10/2025',u:null},{n:1973,c:'23/12/2025',u:'03/01/2026'},{n:1975,c:'03/01/2026',u:'03/01/2026'},{n:1976,c:'03/01/2026',u:'03/01/2026'},{n:1977,c:'03/01/2026',u:'07/01/2025'},{n:1983,c:'08/01/2026',u:null},{n:1984,c:'22/01/2026',u:null}]],
+  [null,'PADOIN MICHELE','28/04/2025',[]],
+  [24,'Pederiva Diego','28/04/2025',[{n:1492,c:'20/09/2025',u:'28/09/2025'},{n:1965,c:'01/10/2025',u:null}]],
+  [25,'Pederiva Domenico','28/04/2025',[{n:748,c:'28/04/2025',u:null},{n:1967,c:'13/10/2025',u:'18/02/2026'},{n:1986,c:'30/01/2026',u:'31/01/2026'}]],
+  [41,'Piani Ivan',null,[]],
+  [26,'Pollazzon Anselmo','28/04/2025',[{n:1976,c:'14/03/2026',u:null}]],
+  [27,'Pollazzon Mauro','28/04/2025',[{n:762,c:'28/04/2025',u:'24/05/2025'},{n:1487,c:'23/08/2025',u:'07/01/2026'},{n:756,c:'28/04/2025',u:'14/03/2026'},{n:1980,c:'14/03/2026',u:null}]],
+  [28,'Recchia Alberto','28/04/2025',[{n:758,c:'28/04/2025',u:null}]],
+  [29,'Recchia Sergio','28/04/2025',[{n:1497,c:'26/09/2025',u:null}]],
+  [42,'Santin Daniele','03/05/2025',[{n:745,c:'03/05/2025',u:'24/07/2025'},{n:1481,c:'29/07/2025',u:'19/10/2025'},{n:1970,c:'17/11/2025',u:'19/01/2026'},{n:1985,c:'27/01/2026',u:null}]],
+  [30,'Spinosi Martino',null,[]],
+  [31,'Tommasel Angelo',null,[{n:751,c:'28/04/2025',u:'23/05/2025'},{n:742,c:'26/05/2025',u:'09/06/2025'},{n:772,c:'11/07/2025',u:'10/07/2025'},{n:778,c:'11/07/2025',u:'08/09/2025'},{n:1499,c:'15/09/2025',u:'16/09/2025'},{n:1485,c:'17/09/2025',u:null}]],
+  [32,'Tommasel Marco','28/04/2025',[]],
+  [49,'Tracanella Alberto',null,[]],
+  [33,'Vanin Antonio','28/04/2025',[{n:744,c:'28/04/2025',u:null}]],
+  [34,'Vendrame Salvino','28/04/2025',[{n:769,c:'28/04/2025',u:null}]],
+  [null,'VILLANOVA NICOLA','30/04/2025',[{n:760,c:'30/04/2025',u:null}]],
+  [35,'Zamai Fiore','28/04/2025',[{n:759,c:'28/04/2025',u:'26/05/2025'},{n:766,c:'03/06/2025',u:'03/06/2026'},{n:764,c:'10/06/2025',u:'09/06/2025'},{n:767,c:'03/07/2025',u:'02/07/2025'},{n:775,c:'10/07/2025',u:'30/08/2025'},{n:1494,c:'05/09/2025',u:'29/03/2026'},{n:1989,c:'01/04/2026',u:null}]],
+  [36,'Zampieri Antonio','28/04/2025',[]],
+  [43,'Zandonella Callehger Massimo',null,[]],
+  [37,'Zavarise Giulio','28/04/2025',[{n:741,c:'28/04/2025',u:null}]],
+  [44,'Zeni Stefano',null,[]],
+  [39,'Zoppas Luca','26/09/2025',[{n:1964,c:'26/09/2025',u:null}]],
+];
+
+let stockFascette = [];
+let _eradQ = '', _eradS = '';
+
+// ---- Utility ----
+function fascDisp(fasc){ return fasc.filter(f=>!f.u); }
+function statoErad(e){
+  const hD = !!e[2], hF = fascDisp(e[3]).length > 0;
+  if (hD && hF) return 'ok';
+  if (!hD) return 'blocco';
+  return 'nofasc';
+}
+
+// ---- Navigation ----
+const TITLES = {dashboard:'Riepilogo',postazioni:'Postazioni',uscite:'Uscite',abbattimenti:'Abbattimenti',biometria:'Biometria',eradicatori:'Abilitati',magazzino:'Fascette',aggiungi:'Aggiungi',whatsapp:'WhatsApp'};
+function show(id, btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+  document.getElementById('page-title').textContent = TITLES[id]||id;
+  if(id==='abbattimenti') renderAbbattimenti();
+  if(id==='uscite') renderUscite();
+  if(id==='biometria') renderBiometria();
+  if(id==='whatsapp'){ renderDestinatari(); initWADate(); }
+  if(id==='dashboard'){ renderDashAbbattimenti(); renderDashUscite(); }
+}
+
+// ---- Tabs ----
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-body').forEach(f=>f.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ---- Table filter ----
+function filterTable(id,q){
+  document.querySelectorAll(`#${id} tbody tr`).forEach(r=>{
+    r.style.display = r.textContent.toLowerCase().includes(q.toLowerCase()) ? '' : 'none';
+  });
+}
+
+// ---- Eradicatori render ----
+function renderErad(){
+  const tbody = document.getElementById('tbody-erad');
+  tbody.innerHTML='';
+  let ab=0,bl=0,sf=0;
+  ERADICATORI.forEach(e=>{
+    const s=statoErad(e);
+    if(s==='ok') ab++; else if(s==='blocco') bl++; else sf++;
+  });
+  document.getElementById('m-abilitati').textContent=ab;
+  document.getElementById('m-bloccati').textContent=bl;
+  document.getElementById('m-senzaf').textContent=sf;
+  document.getElementById('dash-bloccati').textContent=bl;
+  document.getElementById('badge-bloccati').textContent=bl;
+
+  ERADICATORI.forEach(e=>{
+    const [id,nome,disc,fasc]=e;
+    const s=statoErad(e);
+    const disp=fascDisp(fasc);
+    if(_eradQ && !nome.toLowerCase().includes(_eradQ)) return;
+    if(_eradS && s!==_eradS) return;
+
+    let badge;
+    if(s==='ok') badge='<span class="badge b-ok">Abilitato</span>';
+    else if(s==='nofasc') badge='<span class="badge b-warn">Senza fascetta</span>';
+    else {
+      const mm=[];
+      if(!disc) mm.push('disciplinare non firmato');
+      if(!fasc.length) mm.push('nessuna fascetta');
+      badge=`<span class="badge b-danger">Bloccato</span> <span style="font-size:11px;color:var(--danger);margin-left:4px">${mm.join(' · ')}</span>`;
+    }
+    const fascChips = disp.length
+      ? disp.map(f=>`<span class="fasc-chip">${f.n}</span>`).join('')
+      : '<span style="color:var(--text-faint);font-size:12px">-</span>';
+
+    const discCell = disc
+      ? `<span class="disc-edit" onclick="editDisc(this,'${nome}')" title="Clicca per modificare" style="cursor:pointer;border-bottom:1px dashed var(--border-strong);font-size:12px;">${disc}</span>`
+      : `<span class="disc-edit" onclick="editDisc(this,'${nome}')" title="Clicca per inserire" style="cursor:pointer;color:var(--danger);font-size:12px;">non firmato - clicca per inserire</span>`;
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td style="font-family:var(--mono);font-size:12px;cursor:pointer;border-bottom:1px dashed var(--border-strong);" onclick="editId(this,${ERADICATORI.indexOf(e)})" title="Clicca per modificare">${id||'-'}</td><td>${nome}</td><td>${discCell}</td><td style="text-align:center">${fasc.length}</td><td>${fascChips}</td><td>${badge}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+function filtroErad(q){_eradQ=q.toLowerCase();renderErad();}
+function filtroEradStato(v){_eradS=v;renderErad();}
+
+// ---- Modifica disciplinare inline ----
+function editDisc(span, nome){
+  // Se c'è già un input attivo nella stessa cella, non fare nulla
+  if(span.querySelector('input')) return;
+  const e = ERADICATORI.find(x=>x[1]===nome);
+  if(!e) return;
+  const current = e[2] || '';
+  const esc = nome.replace(/'/g, "\\'");
+  span.innerHTML = `<input type="date" value="${current ? current.split('/').reverse().join('-') : ''}" style="font-size:12px;padding:2px 6px;border:1px solid var(--accent);border-radius:4px;background:var(--surface);color:var(--text);" onblur="salvaDisc(this,'${esc}')" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){renderErad();}" />`;
+  span.querySelector('input').focus();
+}
+
+function salvaDisc(input, nome){
+  const val = input.value;
+  if(!val){ renderErad(); return; }
+  const e = ERADICATORI.find(x=>x[1]===nome);
+  if(!e){ renderErad(); return; }
+  const parts = val.split('-');
+  e[2] = `${parts[2]}/${parts[1]}/${parts[0]}`;
+  renderErad();
+  renderBlocchi();
+  salvaDiscCloud();
+}
+
+// ---- Dashboard blocchi ----
+function renderBlocchi(){
+  const bl=ERADICATORI.filter(e=>statoErad(e)==='blocco');
+  const sf=ERADICATORI.filter(e=>statoErad(e)==='nofasc');
+  const grid=document.getElementById('blocchi-grid');
+  let html='';
+  if(bl.length){
+    html+=`<div class="blocco-card danger"><div class="blocco-head danger">Bloccati (${bl.length}) - uscita non consentita</div><div class="blocco-list">${bl.map(e=>e[1]).join('<br>')}</div></div>`;
+  }
+  if(sf.length){
+    html+=`<div class="blocco-card warn"><div class="blocco-head warn">Senza fascetta disponibile (${sf.length})</div><div class="blocco-list">${sf.map(e=>e[1]).join('<br>')}</div></div>`;
+  }
+  grid.innerHTML=html;
+}
+
+// ============================================================
+// POSTAZIONI per eradicatore: nome => [{localita, posta, lat, lon}]
+// ============================================================
+const POSTAZIONI_MAP = {
+  'ANDREOLA DIMITRI': [{l:'volante Roccolo',p:'volante',lat:'',lon:'',arma:'bolt action .308 W',luce:'VISORE',v:true}],
+  'BERNARDI JOHNNY JUNIOR': [{l:'COL ZANIN - Gregoletto',p:'2054',lat:'45.940472',lon:'12.124611',arma:'bolt action 7 RM',luce:'FARO',v:false}],
+  'Bortolini Giuseppe': [{l:'CAMPEA - Filippo',p:'2040b',lat:'45.934194',lon:'12.120944',arma:'kipplauf Blaser 7x65R',luce:'FARO',v:false},{l:'PRADE',p:'2004',lat:'45.937417',lon:'12.067472',arma:'kipplauf Blaser 7x65R',luce:'FARO',v:false},{l:'PRADE - Crose',p:'2045',lat:'45.937750',lon:'12.070694',arma:'kipplauf Blaser 7x65R',luce:'FARO',v:false}],
+  'Bortolini Ivo': [{l:'CARMINE - Domus',p:'2052',lat:'45.950417',lon:'12.082056',arma:'bolt action .270W',luce:'FARO',v:false},{l:'CAMPEA - Filippo',p:'2040b',lat:'45.934194',lon:'12.120944',arma:'bolt action .270W',luce:'FARO',v:false}],
+  'Bottarel Federico': [{l:'volante - Roccolo',p:'',lat:'',lon:'',arma:'45.92086, 12.07860',luce:'VISORE',v:true},{l:'volante - Cecchella',p:'',lat:'',lon:'',arma:'45.92220, \'12,07808',luce:'VISORE',v:true},{l:'volante - Serra',p:'',lat:'45.92656',lon:'12.08429',arma:'45.92102, 12.07818',luce:'VISORE',v:true}],
+  'Callegari Franco': [{l:'COI – TENADA',p:'2028',lat:'45.940722',lon:'12.105889',arma:'Mannliker Shoenauer .270W',luce:'FARO',v:false},{l:'SERRA bassa',p:'2034b',lat:'45.931639',lon:'12.094444',arma:'Mannliker Shoenauer .270W',luce:'FARO',v:false}],
+  'Dal Vecchio Renato': [{l:'CAMPEA - Colpiere',p:'2048',lat:'45.926250',lon:'12.102694',arma:'bolt action cal. 308W',luce:'VISORE',v:false},{l:'COMBAI - Colmellere',p:'2036',lat:'45.929556',lon:'12.062194',arma:'bolt action cal. 308W',luce:'VISORE',v:false},{l:'Pian minor',p:'2007',lat:'45.954056',lon:'12.101833',arma:'bolt action cal. 308W',luce:'VISORE',v:false},{l:'volante - Pardolin',p:'',lat:'',lon:'',arma:'45.930428N, \'12.066007E',luce:'VISORE',v:true}],
+  'Dalle Molle Valter': [{l:'TERMEN',p:'2002',lat:'45.946361',lon:'12.044278',arma:'bolt action  7 x 64',luce:'FARO',v:false}],
+  'Damuzzo Davide': [{l:'COMBAI – Acqua salsa',p:'2030',lat:'',lon:'',arma:'kipplauf C.Z. 7x65   30.06',luce:'FARO',v:false},{l:'COMBAI - Zuel',p:'2049',lat:'45.931139',lon:'12.083694',arma:'kipplauf C.Z. 7x65',luce:'FARO',v:false},{l:'FEDERA - Busette',p:'2020b',lat:'45.957861',lon:'12.044722',arma:'kipplauf C.Z. 7x65',luce:'FARO',v:false},{l:'FEDERA - Val Scura',p:'2019',lat:'',lon:'',arma:'kipplauf C.Z. 7x65',luce:'FARO',v:false},{l:'TERMEN',p:'2002',lat:'45.946361',lon:'12.044278',arma:'kipplauf C.Z. 7x65',luce:'FARO',v:false}],
+  'Davanzo Paolo': [{l:'TERMEN',p:'2002',lat:'45.946361',lon:'12.044278',arma:'bolt action  Sako .308W',luce:'FARO',v:false}],
+  'De Biasi Beniamino': [{l:'CAMPEA - Chiesetta',p:'2018',lat:'',lon:'',arma:'bolt action CZ .270W',luce:'FARO',v:false},{l:'CARMINE - Domus',p:'2052',lat:'45.950417',lon:'12.082056',arma:'bolt action CZ .270W',luce:'FARO',v:false},{l:'PERTEGAR - Damin',p:'2033',lat:'',lon:'',arma:'bolt action CZ .270W',luce:'FARO',v:false}],
+  'De Biasi Franco': [{l:'PRADE',p:'2004',lat:'45.937417',lon:'12.067472',arma:'bolt action  Remington   .270W',luce:'FARO',v:false},{l:'PRADE - Crose',p:'2045',lat:'45.937750',lon:'12.070694',arma:'bolt action  Remington   .270W',luce:'FARO',v:false}],
+  'De Panni Roberto': [{l:'FEDERA - Val Scura',p:'2019',lat:'',lon:'',arma:'bolt action  .300 Weath Mag,',luce:'FARO',v:false},{l:'MONT alto',p:'2011',lat:'45.975028',lon:'12.080361',arma:'bolt action  .300 Weath Mag,',luce:'FARO',v:false}],
+  'FIABANE GIULIA': [{l:'COMBAI – Acqua salsa',p:'2030',lat:'',lon:'',arma:'kipplauf C.Z. 7x65',luce:'VISORE',v:false},{l:'COMBAI - Zuel',p:'2049',lat:'45.931139',lon:'12.083694',arma:'kipplauf C.Z. 7x65',luce:'VISORE',v:false},{l:'volante - Val de Ros',p:'volante',lat:'45.930722',lon:'12.081583',arma:'kipplauf C.Z. 7x66',luce:'VISORE',v:true}],
+  'Facci Federico': [{l:'MONCADER',p:'2026b',lat:'45.908611',lon:'12.079722',arma:'bolt action  6,5 Creedmor',luce:'VISORE',v:false},{l:'TERMEN',p:'2002',lat:'45.946361',lon:'12.044278',arma:'bolt action  6,5 Creedmor',luce:'VISORE',v:false},{l:'volante - Termen',p:'',lat:'45.947222',lon:'12.045833',arma:'bolt action  6,5 Creedmor',luce:'VISORE',v:true},{l:'volante - Cavallotto',p:'',lat:'45.919444',lon:'12.091944',arma:'bolt action  6,5 Creedmor',luce:'VISORE',v:true}],
+  'Facci Michele': [{l:'FEDERA - Busette',p:'2020b',lat:'45.957861',lon:'12.044722',arma:'C.Z. 7x65',luce:'VISORE',v:false},{l:'MONCADER',p:'2026b',lat:'45.908611',lon:'12.079722',arma:'bolt action  .300 WSM',luce:'VISORE',v:false},{l:'MONT alto',p:'2011',lat:'45.975028',lon:'12.080361',arma:'bolt action  .300 WSM',luce:'VISORE',v:false},{l:'PIANEZZE',p:'2014b',lat:'45.958611',lon:'12.104444',arma:'bolt action  .300 WSM',luce:'VISORE',v:false},{l:'PREGAROI - posa',p:'2009',lat:'45.945556',lon:'12.686667',arma:'bolt action  .300 WSM',luce:'VISORE',v:false},{l:'PREGAROI - Troi poia',p:'2027b',lat:'45.945556',lon:'12.686667',arma:'bolt action  .300 WSM',luce:'VISORE',v:false},{l:'TERMEN',p:'2002',lat:'45.946361',lon:'12.044278',arma:'bolt action  .300 WSM',luce:'VISORE',v:false},{l:'volante - Termen',p:'',lat:'45.947222',lon:'12.045833',arma:'bolt action  .300 WSM',luce:'VISORE',v:true},{l:'volante - Cavallotto',p:'',lat:'45.919444',lon:'12.091944',arma:'bolt action  .300 WSM',luce:'VISORE',v:true}],
+  'Favalessa Massimiliano': [{l:'FRATTA - Gusatto',p:'2006b',lat:'45.942778',lon:'12.109806',arma:'bolt action cal. 308W',luce:'FARO',v:false},{l:'PRÀ DE BARC',p:'2035b',lat:'45.938167',lon:'12.094833',arma:'bolt action cal. 308W',luce:'FARO',v:false},{l:'PRADE - Delfina',p:'2042',lat:'45.924750',lon:'12.109722',arma:'bolt action cal. 308W',luce:'FARO',v:false},{l:'SERRA bassa',p:'2034b',lat:'45.931639',lon:'12.094444',arma:'bolt action cal. 308W',luce:'FARO',v:false},{l:'TENADA - Boccador',p:'2029b',lat:'',lon:'',arma:'bolt action  .308 Win',luce:'FARO',v:false}],
+  'Graiff Roberto': [{l:'SERRA Vigneto',p:'2010b',lat:'',lon:'',arma:'bolt action   8x68',luce:'FARO',v:false}],
+  'Gugel Andreino': [{l:'CARMINE - Cadorin',p:'2013',lat:'45.949639',lon:'12.072750',arma:'bolt action  Sako .300 W',luce:'VISORE',v:false},{l:'CASELLA - Farandin',p:'2001b',lat:'45.957806',lon:'12.096389',arma:'bolt action  Sako .300 W',luce:'VISORE',v:false},{l:'FEDERA - Busette',p:'2020b',lat:'45.957861',lon:'12.044722',arma:'bolt action  Sako .300 W',luce:'VISORE',v:false},{l:'FEDERA - Val Scura',p:'2019',lat:'',lon:'',arma:'bolt action  Sako .300 W',luce:'VISORE',v:false},{l:'MILIANA est',p:'2023',lat:'45.937583',lon:'12.115639',arma:'bolt action  Sako .300 W',luce:'VISORE',v:false}],
+  'Guizzo Paolo': [{l:'FEDERA - Busette',p:'2020b',lat:'45.957861',lon:'12.044722',arma:'bolt action .308Win',luce:'FARO',v:false},{l:'FEDERA - Val Scura',p:'2019',lat:'',lon:'',arma:'bolt action .308Win',luce:'FARO',v:false},{l:'MILIANA ovest',p:'2015b',lat:'',lon:'',arma:'bolt action .308Win',luce:'FARO',v:false},{l:'MONT alto',p:'2011',lat:'45.975028',lon:'12.080361',arma:'bolt action .308Win',luce:'FARO',v:false},{l:'TERMEN',p:'2002',lat:'45.946361',lon:'12.044278',arma:'bolt action .308Win',luce:'FARO',v:false}],
+  'Guizzo Riccardo': [{l:'COMBAI – Acqua salsa',p:'2030',lat:'',lon:'',arma:'bolt action  Tikka 7 R.M.',luce:'FARO',v:false},{l:'COMBAI - Zuel ???',p:'2049',lat:'45.931583',lon:'12.082972',arma:'bolt action  Tikka 7 R.M.',luce:'FARO',v:false},{l:'SERRA - Val de Lumon',p:'2003b',lat:'',lon:'',arma:'bolt action  Tikka 7 R.M.',luce:'FARO',v:false}],
+  'Gusatto Paolo': [{l:'FRATTA - Gusatto',p:'2006b',lat:'45.942778',lon:'12.109806',arma:'',luce:'FARO',v:false}],
+  'Lazzari Pierluigi': [{l:'COI – TENADA',p:'2028',lat:'45.940722',lon:'12.105889',arma:'bolt action  Voere .270W',luce:'FARO',v:false},{l:'COSTA - i Beri',p:'2056',lat:'',lon:'',arma:'bolt action  Voere .270W',luce:'FARO',v:false},{l:'FEDERA - Busette',p:'2020b',lat:'45.957861',lon:'12.044722',arma:'bolt action  Voere .270W',luce:'FARO',v:false},{l:'PRÀ DE BARC',p:'2035b',lat:'45.938167',lon:'12.094833',arma:'bolt action  Voere .270W',luce:'FARO',v:false},{l:'PRADE - Delfina',p:'2042',lat:'45.924750',lon:'12.109722',arma:'bolt action  Voere .270W',luce:'FARO',v:false},{l:'TENADA - Boccador',p:'2029b',lat:'',lon:'',arma:'bolt action  Voere .270W',luce:'FARO',v:false},{l:'SERRA - Carmelo',p:'',lat:'',lon:'12.095667',arma:'volante - Serra',luce:'FARO',v:true},{l:'TERMEN',p:'2002',lat:'45.946361',lon:'12.044278',arma:'bolt action  Voere .270W',luce:'FARO',v:false}],
+  'Lodi Luigi': [{l:'CAMPEA - Chiesetta',p:'2018',lat:'',lon:'',arma:'semiauto Benelli 30.06',luce:'FARO',v:false},{l:'CAMPEA - Filippo',p:'2040b',lat:'45.934194',lon:'12.120944',arma:'semiauto Benelli 30.06',luce:'VISORE',v:false},{l:'FEDERA - Busette',p:'2020b',lat:'45.957861',lon:'12.044722',arma:'semiauto Benelli 30.06',luce:'VISORE',v:false},{l:'FEDERA - Val Scura',p:'2019',lat:'',lon:'',arma:'semiauto Benelli 30.06',luce:'VISORE',v:false},{l:'MILIANA ovest',p:'2015b',lat:'',lon:'',arma:'semiauto Benelli 30.06',luce:'VISORE',v:false},{l:'MONT alto',p:'2011',lat:'45.975028',lon:'12.080361',arma:'semiauto Benelli 30.06',luce:'VISORE',v:false},{l:'MONT basso',p:'2012',lat:'',lon:'',arma:'semiauto Benelli 30.06',luce:'VISORE',v:false},{l:'PERTEGAR - Damin',p:'2033',lat:'',lon:'',arma:'semiauto Benelli 30.06',luce:'VISORE',v:false},{l:'TERMEN',p:'2002',lat:'45.946361',lon:'12.044278',arma:'semiauto Benelli 30.06',luce:'VISORE',v:false}],
+  'Nardi Ivan': [{l:'CAMBEL',p:'2041',lat:'',lon:'',arma:'bolt action  .300 WM',luce:'FARO',v:false},{l:'FEDERA - Busette',p:'2020b',lat:'45.957861',lon:'12.044722',arma:'bolt action  .300 WM',luce:'FARO',v:false},{l:'volante - Cambel',p:'',lat:'',lon:'',arma:'45.93104N, \'12.0995E',luce:'FARO',v:true}],
+  'PADOIN MICHELE': [{l:'COI – TENADA',p:'2028',lat:'45.940611',lon:'12.106056',arma:'bolt action Mauser Europa .270W',luce:'FARO',v:false}],
+  'Padoin Dimitri': [{l:'COI – TENADA',p:'2028',lat:'45.940611',lon:'12.106056',arma:'bolt action Mannliker .270W',luce:'FARO',v:false},{l:'FRATTA - Gusatto',p:'2006b',lat:'45.942778',lon:'12.109806',arma:'bolt action Mannliker .270W',luce:'FARO',v:false},{l:'FRATTA - Padoin',p:'2047',lat:'45.934944',lon:'12.101722',arma:'bolt action Mannliker .270W',luce:'FARO',v:false},{l:'PRÀ DE BARC',p:'2035b',lat:'45.938167',lon:'12.094833',arma:'bolt action Mannliker .270W',luce:'FARO',v:false},{l:'SERRA bassa',p:'2034b',lat:'45.931639',lon:'12.094444',arma:'bolt action Mannliker .270W',luce:'FARO',v:false},{l:'volante - Forca',p:'',lat:'45.948306',lon:'12.092167',arma:'45°56\'53.9"N,  12°05\'31.8"E',luce:'FARO',v:true}],
+  'Padoin Giorgio': [{l:'SERRA bassa',p:'2034b',lat:'45.931639',lon:'12.094444',arma:'bolt action .284 Tony',luce:'VISORE',v:false},{l:'TENADA - Casona',p:'2044',lat:'',lon:'',arma:'bolt action .284 Tony',luce:'VISORE',v:false},{l:'volante - Casella',p:'',lat:'',lon:'',arma:'45.95663 12.09443',luce:'VISORE',v:true},{l:'volante - Forca',p:'',lat:'45.950583',lon:'12.091139',arma:'bolt action .284 Tony',luce:'VISORE',v:true},{l:'volante - Chies',p:'',lat:'45.930778',lon:'12.117361',arma:'45°55\'50.8"N 12°07\'02.5"E',luce:'VISORE',v:true},{l:'volante - Castel',p:'',lat:'',lon:'',arma:'45,93636N, 12,11067E',luce:'VISORE',v:true}],
+  'Pederiva Diego': [{l:'CAMPEA - Chiesetta',p:'2018',lat:'',lon:'',arma:'kipplauf Brno 7x65R',luce:'FARO',v:false},{l:'FEDERA - Val Scura',p:'2019',lat:'',lon:'',arma:'kipplauf Brno 7x65R',luce:'FARO',v:false},{l:'FEDERA - Val Scura',p:'2019',lat:'',lon:'',arma:'kipplauf Brno 7x65R',luce:'FARO',v:false},{l:'MONT basso',p:'2012',lat:'',lon:'',arma:'kipplauf Brno 7x65R',luce:'FARO',v:false},{l:'PERTEGAR - Damin',p:'2033',lat:'',lon:'',arma:'kipplauf Brno 7x65R',luce:'FARO',v:false},{l:'TALPONADE - Chies',p:'2038',lat:'',lon:'',arma:'kipplauf Brno 7x65R',luce:'VISORE',v:false},{l:'volante - Prade forner',p:'',lat:'',lon:'',arma:'45.938134N, \'12.063437E',luce:'FARO',v:true}],
+  'Pederiva Domenico': [{l:'CAMPEA - Casette',p:'2022',lat:'45.914972',lon:'12.080056',arma:'semiauto Benelli  cal. 30.06',luce:'VISORE',v:false},{l:'CAMPEA - Chiesetta',p:'2018',lat:'',lon:'',arma:'semiauto Benelli  cal. 30.06',luce:'VISORE',v:false},{l:'CAMPEA - Filippo',p:'2040b',lat:'45.934194',lon:'12.120944',arma:'semiauto Benelli  cal. 30.06',luce:'VISORE',v:false},{l:'CAVALLOTTO - Marsuret',p:'2039',lat:'',lon:'',arma:'semiauto Benelli  cal. 30.06',luce:'VISORE',v:false},{l:'CHECH confine Farra',p:'2031',lat:'',lon:'',arma:'semiauto Benelli  cal. 30.06',luce:'VISORE',v:false},{l:'FEDERA - Busette',p:'2020b',lat:'45.957861',lon:'12.044722',arma:'semiauto Benelli  cal. 30.06',luce:'VISORE',v:false},{l:'FEDERA - Val Scura',p:'2019',lat:'',lon:'',arma:'semiauto Benelli  cal. 30.06',luce:'VISORE',v:false},{l:'MILIANA ovest',p:'2015b',lat:'',lon:'',arma:'semiauto Benelli  cal. 30.06',luce:'VISORE',v:false},{l:'MONCADER',p:'2026b',lat:'45.908611',lon:'12.079722',arma:'semiauto Benelli  cal. 30.06',luce:'VISORE',v:false},{l:'PERTEGAR - Damin',p:'2033',lat:'',lon:'',arma:'semiauto Benelli  cal. 30.06',luce:'VISORE',v:false},{l:'PREMAOR - Pianai',p:'2055',lat:'45.972778',lon:'12.127417',arma:'semiauto Benelli  cal. 30.06',luce:'VISORE',v:false},{l:'SERRA  - S. Micel',p:'2046',lat:'45.927528',lon:'12.086389',arma:'semiauto Benelli  cal. 30.06',luce:'VISORE',v:false},{l:'TALPONADE - Chies',p:'2038',lat:'',lon:'',arma:'semiauto Benelli  cal. 30.06',luce:'VISORE',v:false},{l:'volante - Costalada',p:'',lat:'45.929278',lon:'12.057139',arma:'45°55\'45.4"N 12°03\'25.7"E',luce:'VISORE',v:true},{l:'volante - Cambel',p:'',lat:'',lon:'',arma:'',luce:'VISORE',v:true}],
+  'Pollazzon Anselmo': [{l:'CARMINE - Cadorin',p:'2013',lat:'45.949639',lon:'12.072750',arma:'bolt action  Remington  7 RM',luce:'VISORE',v:false},{l:'CASELLA - Farandin',p:'2001b',lat:'45.957806',lon:'12.096389',arma:'bolt action  Remington  7 RM',luce:'VISORE',v:false},{l:'MILIANA - Miotto',p:'2005b',lat:'45.933889',lon:'12.118917',arma:'bolt action  Remington  7 RM',luce:'VISORE',v:false},{l:'MILIANA est',p:'2023',lat:'45.937583',lon:'12.115639',arma:'bolt action  Remington  7 RM',luce:'VISORE',v:false},{l:'SIROCCOLO',p:'2032',lat:'45.939722',lon:'12.061944',arma:'bolt action  Remington  7 RM',luce:'VISORE',v:false}],
+  'Pollazzon Mauro': [{l:'CARMINE - Cadorin',p:'2013',lat:'45.949639',lon:'12.072750',arma:'bolt action  Sabatti  .308W',luce:'VISORE',v:false},{l:'MILIANA - Miotto',p:'2005b',lat:'45.933889',lon:'12.118917',arma:'bolt action  Sabatti  .308W',luce:'VISORE',v:false},{l:'MILIANA est',p:'2023',lat:'45.937583',lon:'12.115639',arma:'bolt action  Sabatti  .308W',luce:'VISORE',v:false},{l:'SIROCCOLO',p:'2032',lat:'45.939722',lon:'12.061944',arma:'bolt action  Sabatti  .308W',luce:'VISORE',v:false}],
+  'Recchia Alberto': [{l:'CAVALLOTTO - Recchia',p:'2037',lat:'',lon:'',arma:'bolt action  7x64',luce:'FARO',v:false},{l:'TERMEN',p:'2002',lat:'45.946361',lon:'12.044278',arma:'bolt action 7x64',luce:'FARO',v:false}],
+  'Recchia Sergio': [{l:'CAVALLOTTO - Recchia',p:'2037',lat:'',lon:'',arma:'bolt action  7x64',luce:'FARO',v:false}],
+  'Santin Daniele': [{l:'CASELLA - Farandin',p:'2001b',lat:'45.957806',lon:'12.096389',arma:'bolt action  .300 WSM',luce:'FARO',v:false},{l:'SERRA bassa',p:'2034b',lat:'45.931639',lon:'12.094444',arma:'bolt action  .300 WSM',luce:'FARO',v:false},{l:'TENADA - Feltre',p:'2051',lat:'45.939917',lon:'12.113083',arma:'bolt action  .300 WSM',luce:'FARO',v:false},{l:'volante - PIANEZZE Mandre',p:'volante',lat:'',lon:'',arma:'45°57\'51"N, 12°06\'19"E',luce:'FARO',v:true}],
+  'Tommasel Angelo': [{l:'CARMINE - Panigai',p:'2021',lat:'45.940833',lon:'12.078028',arma:'bolt action  Remington 7 x 64 RM',luce:'VISORE',v:false},{l:'CARMINE - Vigne',p:'2050',lat:'45.945694',lon:'12.085556',arma:'bolt action  Remington 7 x 64 RM',luce:'VISORE',v:false},{l:'SERRA  - S. Micel',p:'2046',lat:'45.927528',lon:'12.086389',arma:'bolt action  Remington 7 x 64 RM',luce:'VISORE',v:false},{l:'Volante - Fornace',p:'',lat:'45.942111',lon:'12.082944',arma:'bolt action  Remington 7 x 64 RM',luce:'VISORE',v:true}],
+  'Tommasel Marco': [{l:'CARMINE - Panigai',p:'2021',lat:'45.940833',lon:'12.078028',arma:'bolt action  Remington 7 x 64 RM',luce:'VISORE',v:false},{l:'SERRA  - S. Micel',p:'2046',lat:'45.927528',lon:'12.086389',arma:'semiauto  Browning Bar 30.06',luce:'V. TERMICO',v:false}],
+  'VILLANOVA NICOLA': [{l:'volante Roccolo',p:'volante',lat:'45.919694',lon:'12.092694',arma:'45.919704, \'12.092692',luce:'VISORE',v:true}],
+  'Vanin Antonio': [{l:'CAMPEA - Casette',p:'2022',lat:'45.914972',lon:'12.080056',arma:'bolt action  Weatherby .300 Weath',luce:'VISORE',v:false},{l:'SERRE',p:'2016b',lat:'45.921528',lon:'12.078194',arma:'semiauto  Browning Bar 30.06',luce:'V. TERMICO',v:false}],
+  'Vendrame Salvino': [{l:'CAMPEA - Colpiere',p:'2048',lat:'45.926250',lon:'12.102694',arma:'bolt action  cal. 30.06',luce:'VISORE',v:false},{l:'CAMPEA - la bassa',p:'2025',lat:'45.926222',lon:'12.110667',arma:'bolt action  cal. 30.06',luce:'VISORE',v:false},{l:'volante - Costalt',p:'volante',lat:'',lon:'',arma:'bolt action  cal. 30.06',luce:'VISORE',v:true},{l:'COMBAI - Colmellere',p:'2036',lat:'45.929556',lon:'12.062194',arma:'bolt action  cal. 30.06',luce:'VISORE',v:false}],
+  'Zamai Fiore': [{l:'CAMPEA - Castel',p:'2043',lat:'45.931250',lon:'12.111750',arma:'bolt action  Weatherby .300 Weath',luce:'VISORE',v:false},{l:'COSTALADA',p:'2017',lat:'45.930833',lon:'12.058528',arma:'bolt action  Weatherby .300 Weath',luce:'VISORE',v:false},{l:'FRATTA - Bortolini',p:'2008b',lat:'45.947250',lon:'12.108889',arma:'bolt action  Weatherby .300 Weath',luce:'FARO',v:false},{l:'Pian minor',p:'2007',lat:'45.954056',lon:'12.101833',arma:'bolt action  Tikka .300 WM',luce:'VISORE',v:false}],
+  'Zampieri Antonio': [{l:'TERMEN',p:'2002',lat:'45.946361',lon:'12.044278',arma:'bolt action  .300 WSM',luce:'VISORE',v:false},{l:'volante - Calchera',p:'volante',lat:'45.933056',lon:'12.082500',arma:'45°55\'59" N, 12°04\'57"E',luce:'VISORE',v:true}],
+  'Zandonella Callegher Massimo': [{l:'MONT alto',p:'2011',lat:'45.975028',lon:'12.080361',arma:'semiauto  Browning Bar 30.06',luce:'V. TERMICO',v:false},{l:'TERMEN',p:'2002',lat:'45.946361',lon:'12.044278',arma:'semiauto  Browning Bar 30.06',luce:'V. TERMICO',v:false}],
+  'Zavarise Giulio': [{l:'CAMPEA - Casette',p:'2022',lat:'45.914972',lon:'12.080056',arma:'bolt action Weatherby .270 Weath',luce:'VISORE',v:false},{l:'SERRE',p:'2016b',lat:'45.921528',lon:'12.078194',arma:'bolt action Weatherby .270 Weath',luce:'VISORE',v:false}],
+  'Zoppas Luca': [{l:'volante - Pianezze',p:'',lat:'45.961861',lon:'12.100972',arma:'45.961848,12.100981',luce:'FARO',v:true},{l:'volante - Costolada',p:'',lat:'45.958417',lon:'12.099556',arma:'45.958428N,12.099559E',luce:'FARO',v:true}]
+};
+
+let _postazioneSelezionata = null;
+
+// ---- Verifica abilitazione uscita ----
+function verificaAbilitazione(){
+  const nome=document.getElementById('sel-erad-uscita').value;
+  const esito=document.getElementById('esito-verifica');
+  const formPost=document.getElementById('form-postazione');
+  const rest=document.getElementById('form-uscita-rest');
+  _postazioneSelezionata=null;
+  formPost.style.display='none';
+  rest.style.display='none';
+  document.getElementById('postazione-selezionata').style.display='none';
+
+  if(!nome){esito.innerHTML='';return;}
+  const e=ERADICATORI.find(x=>x[1]===nome);
+  if(!e) return;
+  const s=statoErad(e);
+  const disp=fascDisp(e[3]);
+
+  if(s==='ok'){
+    const fs=disp.map(f=>`<span class="fasc-chip">${f.n}</span>`).join(' ');
+    esito.innerHTML=`<div class="alert alert-ok"><strong>Eradicatore abilitato.</strong> Fascette disponibili: ${fs}</div>`;
+    renderPostazioniGrid(nome);
+    formPost.style.display='block';
+  } else if(s==='nofasc'){
+    esito.innerHTML=`<div class="alert alert-warn"><strong>Attenzione:</strong> ${nome} ha firmato il disciplinare ma non ha fascette disponibili.<br>Assegna una fascetta dal magazzino prima di procedere.</div>`;
+  } else {
+    const mm=[];
+    if(!e[2]) mm.push('<li>Disciplinare non firmato</li>');
+    if(!e[3].length) mm.push('<li>Nessuna fascetta assegnata</li>');
+    esito.innerHTML=`<div class="alert alert-danger"><strong>Uscita non consentita.</strong> ${nome} non soddisfa i requisiti:<ul>${mm.join('')}</ul></div>`;
+  }
+}
+
+function renderPostazioniGrid(nome){
+  const postazioni = POSTAZIONI_MAP[nome] || [];
+  const grid = document.getElementById('postazioni-grid');
+  document.getElementById('lbl-erad-posta').textContent = nome;
+  let html = '';
+
+  if(!postazioni.length){
+    html = '<p style="font-size:13px;color:var(--text-muted);grid-column:1/-1;">Nessuna postazione fissa assegnata.</p>';
+  } else {
+    postazioni.forEach((p,i) => {
+      html += `<div class="posta-card" onclick="selezionaPostazione(${i},'${nome}')" id="pcard-${i}" style="border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:12px 14px;cursor:pointer;transition:all .15s;background:var(--surface);">
+        <div style="margin-bottom:6px;"><span style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:2px 8px;border-radius:4px;border:1px solid var(--border);">${p.p}</span></div>
+        <div style="font-size:13px;font-weight:500;">${p.l}</div>
+      </div>`;
+    });
+  }
+
+  // Volante sempre presente
+  html += `<div class="posta-card" onclick="selezionaPostazione('volante','${nome}')" id="pcard-volante" style="border:1.5px dashed var(--border);border-radius:var(--radius-lg);padding:12px 14px;cursor:pointer;transition:all .15s;background:var(--surface);">
+    <div style="margin-bottom:6px;"><span style="font-family:var(--mono);font-size:12px;background:var(--info-light);color:var(--info);padding:2px 8px;border-radius:4px;">VOLANTE</span></div>
+    <div style="font-size:13px;font-weight:500;">Uscita volante</div>
+    <div style="font-size:11px;color:var(--text-faint);margin-top:3px;">Zona libera - inserire a mano</div>
+  </div>`;
+
+  grid.innerHTML = html;
+}
+
+function selezionaPostazione(idx, nome){
+  document.querySelectorAll('.posta-card').forEach(c=>{
+    c.style.borderColor='var(--border)';
+    c.style.background='var(--surface)';
+  });
+
+  const rest = document.getElementById('form-uscita-rest');
+  const infoBox = document.getElementById('postazione-selezionata');
+  const volRow = document.getElementById('volante-zona-row');
+
+  if(idx==='volante'){
+    document.getElementById('pcard-volante').style.borderColor='var(--info)';
+    document.getElementById('pcard-volante').style.background='var(--info-light)';
+    _postazioneSelezionata = {tipo:'volante'};
+    document.getElementById('info-posta').textContent = 'VOLANTE';
+    document.getElementById('info-localita').textContent = '-';
+    document.getElementById('info-volante-note').style.display='block';
+    infoBox.style.display='block';
+    volRow.style.display='grid';
+  } else {
+    const p = (POSTAZIONI_MAP[nome]||[])[idx];
+    if(!p) return;
+    document.getElementById(`pcard-${idx}`).style.borderColor='var(--accent)';
+    document.getElementById(`pcard-${idx}`).style.background='var(--ok-light)';
+    _postazioneSelezionata = p;
+    document.getElementById('info-posta').textContent = p.p;
+    document.getElementById('info-localita').textContent = p.l;
+    document.getElementById('info-volante-note').style.display='none';
+    infoBox.style.display='block';
+    volRow.style.display='none';
+    document.getElementById('in-toponimo-volante').value='';
+    document.getElementById('in-lat-volante').value='';
+    document.getElementById('in-lon-volante').value='';
+  }
+  rest.style.display='block';
+}
+
+function salvaAbbattimento(){
+  const cacciatore = document.getElementById('ab-cacciatore').value.trim();
+  const data       = document.getElementById('ab-data').value;
+  const tipo       = document.getElementById('ab-tipo').value;
+  const sesso      = document.getElementById('ab-sesso').value;
+  const fascetta   = document.getElementById('ab-fascetta').value.trim();
+  const fb         = document.getElementById('ab-feedback');
+
+  // Validazione campi obbligatori
+  if(!cacciatore || !data || !fascetta){
+    fb.innerHTML='<div class="alert alert-danger">Compila almeno: cacciatore, data e numero fascetta.</div>';
+    return;
+  }
+
+  // Ricava località e posta in base al tipo
+  let localita = '', posta = '';
+  if(tipo==='fissa'){
+    posta    = document.getElementById('ab-posta').value.trim();
+    localita = document.getElementById('ab-localita-fissa').value.trim();
+  } else if(tipo==='volante'){
+    localita = document.getElementById('ab-toponimo').value.trim();
+  } else {
+    localita = document.getElementById('ab-localita-sel').value.trim();
+  }
+
+  // Formatta data da yyyy-mm-dd a dd/mm/yyyy
+  const parts = data.split('-');
+  const dataFmt = `${parts[2]}/${parts[1]}/${parts[0]}`;
+
+  const n = ABBATTIMENTI.length + 1;
+  ABBATTIMENTI.push([n, cacciatore, localita, posta, dataFmt, sesso, tipo, fascetta]);
+
+  fb.innerHTML=`<div class="alert alert-ok"><strong>Abbattimento n.${n} salvato.</strong> ${cacciatore} - ${dataFmt} - ${tipoBadge(tipo)} - fascetta <span class="fasc-chip">${fascetta}</span></div>`;
+  resetAbbattimentoForm();
+  renderAbbattimenti();
+  salvaAbbattimentiCloud();
+  setTimeout(()=>fb.innerHTML='', 5000);
+}
+
+function resetAbbattimentoForm(){
+  ['ab-cacciatore','ab-posta','ab-localita-fissa','ab-toponimo','ab-lat','ab-lon','ab-localita-sel','ab-fascetta'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('ab-data').value='';
+  document.getElementById('ab-tipo').value='fissa';
+  document.getElementById('ab-sesso').value='FA';
+  toggleAbTipo();
+}
+
+// ---- Toggle tipo abbattimento ----
+function toggleAbTipo(){
+  const v = document.getElementById('ab-tipo').value;
+  document.getElementById('ab-fissa-row').style.display    = v==='fissa'     ? 'grid' : 'none';
+  document.getElementById('ab-volante-row').style.display  = v==='volante'   ? 'grid' : 'none';
+  document.getElementById('ab-selezione-row').style.display= v==='selezione' ? 'grid' : 'none';
+}
+
+function toggleNuovaPostazione(){
+  const f = document.getElementById('form-nuova-posta');
+  f.style.display = f.style.display==='none' ? 'block' : 'none';
+  if(f.style.display==='block'){
+    document.getElementById('np-numero').value='';
+    document.getElementById('np-localita').value='';
+    document.getElementById('np-feedback').innerHTML='';
+  }
+}
+
+function aggiungiPostazione(){
+  const nome = document.getElementById('sel-erad-uscita').value;
+  const num = document.getElementById('np-numero').value.trim();
+  const loc = document.getElementById('np-localita').value.trim();
+  const fb = document.getElementById('np-feedback');
+  if(!num || !loc){ fb.innerHTML='<div class="alert alert-danger">Inserisci numero posta e località.</div>'; return; }
+  if(!POSTAZIONI_MAP[nome]) POSTAZIONI_MAP[nome]=[];
+  POSTAZIONI_MAP[nome].push({l:loc, p:num, lat:'', lon:''});
+  fb.innerHTML=`<div class="alert alert-ok"><strong>Postazione ${num} - ${loc}</strong> aggiunta per ${nome}.</div>`;
+  toggleNuovaPostazione();
+  renderPostazioniGrid(nome);
+}
+
+function salvaUscita(){
+  if(!_postazioneSelezionata){
+    document.getElementById('save-uscita-ok').innerHTML='<div class="alert alert-danger">Seleziona prima una postazione.</div>';
+    return;
+  }
+  document.getElementById('save-uscita-ok').innerHTML='<div class="alert alert-ok"><strong>Uscita salvata</strong> nel registro. Ricorda di aggiornare anche il file Excel.</div>';
+  // Reset form
+  setTimeout(()=>{
+    document.getElementById('sel-erad-uscita').value='';
+    document.getElementById('esito-verifica').innerHTML='';
+    document.getElementById('form-postazione').style.display='none';
+    document.getElementById('form-uscita-rest').style.display='none';
+    document.getElementById('postazione-selezionata').style.display='none';
+    _postazioneSelezionata=null;
+  }, 3000);
+}
+
+// ---- Magazzino ----
+function renderStock(){
+  const list=document.getElementById('stock-list');
+  const mc=document.getElementById('m-stock');
+  const dc=document.getElementById('dash-stock');
+  mc.textContent=stockFascette.length;
+  if(dc) dc.textContent=stockFascette.length;
+  list.innerHTML=stockFascette.length
+    ? stockFascette.map(n=>`<span class="stock-chip"><span>${n}</span><span class="rm" onclick="rimuoviStock(${n})">×</span></span>`).join('')
+    : '<span style="font-size:13px;color:var(--text-faint)">Nessuna fascetta in giacenza.</span>';
+
+  const selF=document.getElementById('sel-fasc-stock');
+  selF.innerHTML='<option value="">- seleziona -</option>';
+  stockFascette.forEach(n=>{ const o=document.createElement('option');o.value=n;o.textContent=n;selF.appendChild(o); });
+}
+
+function aggiungiStock(){
+  const raw=document.getElementById('input-stock').value;
+  const nums=[...new Set(raw.split(/[\n,\s]+/).map(s=>parseInt(s)).filter(n=>!isNaN(n)&&n>0))];
+  const fb=document.getElementById('stock-feedback');
+  if(!nums.length){fb.innerHTML='<div class="alert alert-danger">Inserisci almeno un numero valido.</div>';return;}
+  const nuovi=nums.filter(n=>!stockFascette.includes(n));
+  stockFascette.push(...nuovi);
+  stockFascette.sort((a,b)=>a-b);
+  document.getElementById('input-stock').value='';
+  fb.innerHTML=`<div class="alert alert-ok"><strong>${nuovi.length} fascette aggiunte</strong> al magazzino.</div>`;
+  renderStock();
+  salvaStockCloud();
+  setTimeout(()=>fb.innerHTML='',4000);
+}
+
+function rimuoviStock(n){
+  stockFascette=stockFascette.filter(x=>x!==n);
+  renderStock();
+}
+
+function assegnaFascetta(){
+  const dest=document.getElementById('sel-dest').value;
+  const nF=parseInt(document.getElementById('sel-fasc-stock').value);
+  const data=document.getElementById('data-assegna').value;
+  const fb=document.getElementById('assegna-feedback');
+  if(!dest||!nF||!data){fb.innerHTML='<div class="alert alert-danger">Compila tutti i campi prima di procedere.</div>';return;}
+  const e=ERADICATORI.find(x=>x[1]===dest);
+  if(e){
+    e[3].push({n:nF,c:data,u:null});
+    stockFascette=stockFascette.filter(x=>x!==nF);
+    renderStock(); renderErad(); renderBlocchi();
+    salvaStockCloud();
+    const dateStr=data.split('-').reverse().join('/');
+    fb.innerHTML=`<div class="alert alert-ok"><strong>Fascetta ${nF}</strong> assegnata a <strong>${dest}</strong> in data ${dateStr}.</div>`;
+    document.getElementById('sel-dest').value='';
+    document.getElementById('sel-fasc-stock').value='';
+    document.getElementById('data-assegna').value='';
+    setTimeout(()=>fb.innerHTML='',5000);
+  }
+}
+
+// ---- Render tabella abbattimenti ----
+function parseData(s){
+  // Accetta dd/mm/yyyy o yyyy-mm-dd
+  if(!s) return 0;
+  const p = s.split('/');
+  if(p.length===3) return new Date(`${p[2]}-${p[1]}-${p[0]}`).getTime();
+  return new Date(s).getTime();
+}
+
+function renderAbbattimenti(){
+  const tbody = document.getElementById('tbody-abbattimenti');
+  if(!tbody) return;
+  // Ordina per data crescente (copia per non alterare l'array originale)
+  const ordinati = ABBATTIMENTI.map((r,i)=>({r,i}))
+    .sort((a,b) => parseData(a.r[4]) - parseData(b.r[4]));
+  tbody.innerHTML = ordinati.map(({r, i:idx}, pos) => {
+    const sessoClass = r[5]==='F1'||r[5]==='FA' ? 'b-warn' : r[5]==='M1'||r[5]==='MA' ? 'b-ok' : 'b-info';
+    return `<tr id="ab-row-${idx}">
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text-faint)">${pos+1}</td>
+      <td>${r[1]}</td>
+      <td>${r[2]}</td>
+      <td style="font-family:var(--mono);font-size:11px">${r[3]||'-'}</td>
+      <td style="font-family:var(--mono);font-size:11px">${r[4]}</td>
+      <td><span class="badge ${sessoClass}">${r[5]}</span></td>
+      <td id="ab-tipo-cell-${idx}" onclick="editTipo(${idx})" title="Clicca per modificare" style="cursor:pointer;">${tipoBadge(r[6])}</td>
+      <td><span class="fasc-chip">${r[7]}</span></td>
+      <td style="white-space:nowrap;">
+        <button onclick="eliminaAbbattimento(${idx})" title="Elimina" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:14px;padding:2px 4px;">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+  renderStatsAbbattimenti();
+  renderDashAbbattimenti();
+}
+
+function eliminaAbbattimento(idx){
+  if(!confirm(`Eliminare l'abbattimento n.${ABBATTIMENTI[idx][0]} di ${ABBATTIMENTI[idx][1]}?`)) return;
+  ABBATTIMENTI.splice(idx, 1);
+  ABBATTIMENTI.forEach((r,i) => r[0]=i+1);
+  renderAbbattimenti();
+  salvaAbbattimentiCloud();
+}
+
+function editTipo(idx){
+  const cell = document.getElementById(`ab-tipo-cell-${idx}`);
+  if(cell.querySelector('select')) return;
+  const cur = ABBATTIMENTI[idx][6];
+  cell.innerHTML = `<select onchange="salvaTipo(${idx},this.value)" onblur="salvaTipo(${idx},this.value)"
+    style="font-size:12px;padding:2px 6px;border:1px solid var(--accent);border-radius:4px;background:var(--surface);color:var(--text);">
+    <option value="fissa"    ${cur==='fissa'    ?'selected':''}>Posta fissa</option>
+    <option value="volante"  ${cur==='volante'  ?'selected':''}>Volante</option>
+    <option value="selezione"${cur==='selezione'?'selected':''}>Selezione</option>
+  </select>`;
+  cell.querySelector('select').focus();
+}
+
+function salvaTipo(idx, val){
+  ABBATTIMENTI[idx][6] = val;
+  renderAbbattimenti();
+  salvaAbbattimentiCloud();
+}
+
+function renderDashAbbattimenti(){
+  const dash = document.getElementById('dash-tbody-abbattimenti');
+  if(!dash) return;
+  // Ultimi 5 per data
+  const ultimi = [...ABBATTIMENTI].sort((a,b)=>parseData(b[4])-parseData(a[4])).slice(0,5);
+  const sessoClass = s => s==='F1'||s==='FA' ? 'b-warn' : s==='M1'||s==='MA' ? 'b-ok' : 'b-info';
+  dash.innerHTML = ultimi.map(r=>`<tr>
+    <td>${r[1]}</td>
+    <td style="font-family:var(--mono);font-size:11px">${r[4]}</td>
+    <td><span class="badge ${sessoClass(r[5])}">${r[5]}</span></td>
+    <td>${tipoBadge(r[6])}</td>
+    <td><span class="fasc-chip">${r[7]}</span></td>
+  </tr>`).join('');
+  const mc = document.getElementById('dash-abbattimenti');
+  if(mc) mc.textContent = ABBATTIMENTI.length;
+}
+
+function renderStatsAbbattimenti(){
+  const tot = ABBATTIMENTI.length;
+  if(!tot) return;
+  const nFissa    = ABBATTIMENTI.filter(r=>tipoLabel(r[6])==='Posta fissa').length;
+  const nVolante  = ABBATTIMENTI.filter(r=>tipoLabel(r[6])==='Volante').length;
+  const nSel      = ABBATTIMENTI.filter(r=>tipoLabel(r[6])==='Selezione').length;
+  const bar = (n, color) => `<div style="flex:1;height:8px;background:var(--surface2);border-radius:4px;overflow:hidden;"><div style="width:${Math.round(n/tot*100)}%;height:100%;background:${color};border-radius:4px;"></div></div>`;
+  const row = (label, n, color) => `<div style="display:flex;align-items:center;gap:12px;">
+    <div style="width:100px;font-size:13px;flex-shrink:0;">${label}</div>
+    ${bar(n,color)}
+    <div style="font-family:var(--mono);font-size:12px;min-width:28px;text-align:right;">${n}</div>
+  </div>`;
+  const el = document.getElementById('stats-abbattimenti');
+  if(el) el.innerHTML =
+    row('Posta fissa', nFissa,   'var(--accent)') +
+    row('Volante',     nVolante,  'var(--info)') +
+    row('Selezione',   nSel,      'var(--ok)');
+  // aggiorna anche dashboard
+  const dc = document.getElementById('dash-abbattimenti');
+  if(dc) dc.textContent = tot;
+}
+
+// ---- Importazione massiva abbattimenti ----
+// Dati abbattimenti in memoria: [n, cacciatore, localita, posta, data, sesso, tipo, fascetta]
+let ABBATTIMENTI = [
+  [1,'Padoin Giorgio','Montecorno','','03/01/2026','FA','selezione','1975'],
+  [2,'Padoin Giorgio','Montecorno','','03/01/2026','F1','selezione','1976'],
+  [3,'Padoin Giorgio','Montecorno','','03/01/2026','FA','selezione','1973'],
+  [4,'Bottarel Federico','Roccolo','','07/01/2026','FA','selezione','1498'],
+  [5,'Padoin Giorgio','Castel','','07/01/2026','FA','selezione','1977'],
+  [6,'Pollazzon Mauro','MILIANA - Miotto','2005b','07/01/2026','MA','fissa','1478'],
+  [7,'Santin Daniele','TENADA - Feltre','2051','19/01/2026','M1','fissa','1970'],
+  [8,'Pederiva Domenico','Versante nord','','31/01/2026','FA','volante','1986'],
+];
+
+const USCITE_INIT = [
+  ['Pederiva Domenico','PERTEGAR - Damin','2033','VISORE','semiauto Benelli  cal. 30.06','02/01/2026','17:00-19:00'],
+  ['Pederiva Domenico','PERTEGAR - Damin','2033','VISORE','semiauto Benelli  cal. 30.06','09/01/2026','17:00-19:00'],
+  ['Bottarel Federico','volante - Roccolo','','VISORE','45.92086, \'12.07860','11/01/2026','17:00-19:00'],
+  ['Pederiva Domenico','PERTEGAR - Damin','2033','VISORE','semiauto Benelli  cal. 30.06','11/01/2026','17:00-19:00'],
+  ['Zavarise Giulio','CAMPEA - Casette','2022','VISORE','bolt action Weatherby .270 Weath','11/01/2026','17:00-23:00'],
+  ['Pederiva Domenico','PERTEGAR - Damin','2033','VISORE','semiauto Benelli  cal. 30.06','13/01/2026','17:00-19:00'],
+  ['Facci Michele','MONCADER','2026b','VISORE','bolt action  .300 WSM','14/01/2026','18:00-23:00'],
+  ['Pederiva Domenico','Campea - Casette','2022','VISORE','semiauto Benelli  cal. 30.06','14/01/2026','17:00-22:00'],
+  ['Facci Michele','MONCADER','2026b','VISORE','bolt action  .300 WSM','15/01/2026','18:00-23:00'],
+  ['Pederiva Domenico','Campea - Casette','2022','VISORE','semiauto Benelli  cal. 30.06','15/01/2026','17:00-22:00'],
+  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','15/01/2026','17:30-23:00'],
+  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','15/01/2026','17:30-23:00'],
+  ['Facci Michele','MONCADER','2026b','VISORE','bolt action  .300 WSM','16/01/2026','18:00-23:00'],
+  ['Pederiva Domenico','Campea /Casette','2022','VISORE','semiauto Benelli  cal. 30.06','16/01/2026','17:00-22:00'],
+  ['Pollazzon Anselmo','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','16/01/2026','17:30-23:00'],
+  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','16/01/2026','17:30-23:00'],
+  ['Dal Vecchio Renato','volante - Pardolin','','VISORE','45.930428N, \'12.066007E','17/01/2026','17:00-02:00'],
+  ['Santin Daniele','TENADA - Feltre','2051','FARO','bolt action  .300 WSM','17/01/2026','18:00-22:00'],
+  ['Vendrame Salvino','COMBAI - Colmellere','2036','VISORE','bolt action  cal. 30.06','17/01/2026','16:00-24:00'],
+  ['Zamai Fiore','Pian minor','2007','VISORE','bolt action  Tikka .300 WM','17/01/2026','18:00-24:00'],
+  ['Pederiva Domenico','CAMPEA - Casette','2022','VISORE','semiauto Benelli  cal. 30.06','20/01/2026','17:00-22:00'],
+  ['Pederiva Domenico','CAMPEA - Casette','2022','VISORE','semiauto Benelli  cal. 30.06','21/01/2026','17:00-22:00'],
+  ['Pollazzon Mauro','CARMINE - Cadorin','2013','VISORE','bolt action  Sabatti  .308W','23/01/2026','17:30-23:00'],
+  ['Gugel Andreino','CASELLA - Farandin','2001b','VISORE','bolt action  Sako .300 W','24/01/2026','18:00-21:00'],
+  ['Santin Daniele','volante - PIANEZZE Mandre','volante','FARO','45°57\'51"N, 12°06\'19"E','24/01/2026','18:00-21:00'],
+  ['VILLANOVA NICOLA','volante Roccolo','volante','VISORE','45.919704, \'12.092692','24/01/2026','17:30-21:00'],
+  ['Bottarel Federico','volante - Roccolo','','VISORE','45.92086, 12.07860','25/01/2026','17:30-24:00'],
+  ['Gugel Andreino','CASELLA - Farandin','2001b','VISORE','bolt action  Sako .300 W','25/01/2026','18:00-21:00'],
+  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','25/01/2026','17:30-24:00'],
+  ['VILLANOVA NICOLA','volante Roccolo','volante','VISORE','45.919704, \'12.092692','25/01/2026','17:30-21:00'],
+  ['Bottarel Federico','volante - Cecchella','','VISORE','45.92220, \'12,07808','28/01/2026','18:00-01:00'],
+  ['Bottarel Federico','volante - Cecchella','','VISORE','45.92927, \'12,09619','31/01/2026','18:30-01:00'],
+  ['Pederiva Domenico','PERTEGAR - Damin','2033','VISORE','semiauto Benelli  cal. 30.06','31/01/2026','17:00-19:00'],
+  ['Vendrame Salvino','CAMPEA - Colpiere','2048','VISORE','bolt action  cal. 30.06','01/02/2026','18:00-23:00'],
+  ['Bottarel Federico','volante - Serra','','VISORE','45.92637  \'12.08665','04/02/2026','17:30-01:00'],
+  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','06/02/2026','17:30-23:00'],
+  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','06/02/2026','17:30-23:00'],
+  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','07/02/2026','17:30-23:00'],
+  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','07/02/2026','17:30-23:00'],
+  ['Vendrame Salvino','CAMPEA - Colpiere','2048','VISORE','bolt action  cal. 30.06','08/02/2026','18:00-23:00'],
+  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','13/02/2026','18:00-23:00'],
+  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','13/02/2026','18:00-23:00'],
+  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','14/02/2026','18:00-22:30'],
+  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','14/02/2026','18:00-22:30'],
+  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','15/02/2026','18:00-22:30'],
+  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','15/02/2026','18:00-22:30'],
+  ['Bottarel Federico','volante - Serra','','VISORE','45.92102, 12.07818','16/02/2026','17:00-01:00'],
+  ['Bottarel Federico','volante - Serra','','VISORE','45.92102, 12.07818','18/02/2026','17:00-01:00'],
+  ['Pederiva Domenico','PERTEGAR - Damin','2033','VISORE','semiauto Benelli  cal. 30.06','18/02/2026','18:00-23:00'],
+  ['Bottarel Federico','volante - Serra','','VISORE','45.92656, 12.08429','21/02/2026','18:00-01:00'],
+  ['Vendrame Salvino','CAMPEA - la bassa','2025','VISORE','bolt action  cal. 30.06','24/02/2026','17:00-23:30'],
+  ['Pederiva Domenico','PERTEGAR - Damin','2033','VISORE','semiauto Benelli  cal. 30.06','26/02/2026','17:00-23:00'],
+  ['Vendrame Salvino','CAMPEA - la bassa','2025','VISORE','bolt action  cal. 30.06','26/02/2026','17:00-23:30'],
+  ['Vendrame Salvino','CAMPEA - Colpiere','2048','VISORE','bolt action  cal. 30.06','01/03/2026','18:00-23:30'],
+  ['Lodi Luigi','MILIANA ovest','2015b','VISORE','semiauto Benelli 30.06','04/03/2026','18:00-21:00'],
+  ['Vendrame Salvino','CAMPEA - Colpiere','2048','VISORE','bolt action  cal. 30.06','04/03/2026','18:00-24:00'],
+  ['Pederiva Domenico','CAMPEA - Casette','2022','VISORE','semiauto Benelli  cal. 30.06','05/03/2026','18:00-22:00'],
+  ['Vendrame Salvino','CAMPEA - la bassa','2025','VISORE','bolt action  cal. 30.06','06/03/2026','18:00-24:00'],
+  ['Pederiva Domenico','CAMPEA - Casette','2022','VISORE','semiauto Benelli  cal. 30.06','09/03/2026','18:00-22:00'],
+  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','13/03/2026','18:00-23:30'],
+  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','13/03/2026','18:30-22:00'],
+  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','13/03/2026','18:00-23:30'],
+  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','13/03/2026','18:30-22:00'],
+  ['Bottarel Federico','volante - Serra','','VISORE','45.926502, 12.08360','14/03/2026','18:00-24:00'],
+  ['BERNARDI JOHNNY JUNIOR','COL ZANIN - Gregoletto','2054','FARO','bolt action 7 RM','16/03/2026','18:30-23:00'],
+  ['Damuzzo Davide','COMBAI – Acqua salsa','2030','FARO','kipplauf C.Z. 7x65   30.06','18/03/2026','19:00-23:00'],
+  ['Damuzzo Davide','COMBAI – Acqua salsa','2030','FARO','kipplauf C.Z. 7x65   30.06','20/03/2026','18:00-21:30'],
+  ['BERNARDI JOHNNY JUNIOR','COL ZANIN - Gregoletto','2054','FARO','bolt action 7 RM','23/03/2026','18:30-23:00'],
+  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','23/03/2026','18:30-24:00'],
+  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','23/03/2026','18:30-24:00'],
+  ['Zamai Fiore','CAMPEA - Castel','2043','VISORE','bolt action  Weatherby .300 Weath','29/03/2026','20:00-01:00']
+];
+
+
+function tipoLabel(t){
+  if(!t) return '-';
+  const m = t.toLowerCase();
+  if(m.includes('fiss') || m.includes('post')) return 'Posta fissa';
+  if(m.includes('vol')) return 'Volante';
+  if(m.includes('sel')) return 'Selezione';
+  return t;
+}
+function tipoBadge(t){
+  const l=tipoLabel(t);
+  if(l==='Posta fissa') return `<span class="badge b-gray">${l}</span>`;
+  if(l==='Volante')     return `<span class="badge b-info">${l}</span>`;
+  if(l==='Selezione')   return `<span class="badge b-ok">${l}</span>`;
+  return `<span class="badge b-gray">${l}</span>`;
+}
+
+function importaAbbattimenti(){
+  const raw = document.getElementById('import-textarea').value.trim();
+  const fb  = document.getElementById('import-preview');
+  const fbMsg = document.getElementById('import-feedback');
+  if(!raw){ fbMsg.innerHTML='<div class="alert alert-danger">Nessun dato da importare.</div>'; return; }
+
+  const righe = raw.split('\n').map(r=>r.trim()).filter(r=>r);
+  const nuovi = [];
+  const errori = [];
+
+  righe.forEach((riga, i) => {
+    // accetta tab o ; come separatore
+    const sep = riga.includes('\t') ? '\t' : ';';
+    const cols = riga.split(sep).map(c=>c.trim());
+    // colonne: 0=cacciatore 1=localita 2=posta 3=data 4=sesso 5=tipo 6=fascetta
+    if(cols.length < 4){
+      errori.push(`Riga ${i+1}: troppo poche colonne (${cols.length})`);
+      return;
+    }
+    nuovi.push([
+      ABBATTIMENTI.length + nuovi.length + 1,
+      cols[0] || '-',
+      cols[1] || '-',
+      cols[2] || '-',
+      cols[3] || '-',
+      cols[4] || '-',
+      cols[5] || '-',
+      cols[6] || '-',
+    ]);
+  });
+
+  if(errori.length){
+    fbMsg.innerHTML=`<div class="alert alert-warn"><strong>Attenzione:</strong> ${errori.join('<br>')}</div>`;
+  }
+  if(!nuovi.length){ return; }
+
+  ABBATTIMENTI.push(...nuovi);
+
+  // Anteprima righe importate
+  const rows = nuovi.map(r=>`
+    <tr>
+      <td style="font-family:var(--mono);font-size:12px">${r[0]}</td>
+      <td>${r[1]}</td><td>${r[2]}</td>
+      <td style="font-family:var(--mono);font-size:12px">${r[3]||'-'}</td>
+      <td style="font-family:var(--mono);font-size:12px">${r[4]}</td>
+      <td><span class="badge b-warn">${r[5]}</span></td>
+      <td>${tipoBadge(r[6])}</td>
+      <td><span class="fasc-chip">${r[7]}</span></td>
+    </tr>`).join('');
+
+  fb.innerHTML=`
+    <div class="alert alert-ok" style="margin-bottom:12px;"><strong>${nuovi.length} abbattimenti importati</strong> correttamente.</div>
+    <div class="table-wrap"><table>
+      <thead><tr><th>N.</th><th>Cacciatore</th><th>Località</th><th>Posta</th><th>Data</th><th>Sesso</th><th>Tipo</th><th>Fascetta</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table></div>`;
+
+  document.getElementById('import-textarea').value='';
+  if(!errori.length) fbMsg.innerHTML='';
+  renderAbbattimenti();
+  salvaAbbattimentiCloud();
+}
+
+// ---- Popola select ----
+function popolaSelect(){
+  const s1=document.getElementById('sel-erad-uscita');
+  const s2=document.getElementById('sel-dest');
+  ERADICATORI.forEach(e=>{
+    [s1,s2].forEach(sel=>{ const o=document.createElement('option');o.value=e[1];o.textContent=e[1];sel.appendChild(o); });
+  });
+}
+
+// ---- Topbar date ----
+function setDate(){
+  const d=new Date();
+  document.getElementById('page-date').textContent=d.toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+}
+
+// ---- Google Sheets sync ----
+const GS_URL = 'https://script.google.com/macros/s/AKfycbxZOQ8f1zF8ENswoncswdFXNnxw-rZzvtgRw6YviQyPR2jrYqJv5fxPUsQ_8KQrE6B1/exec';
+
+function mostraSync(msg, tipo){
+  let el = document.getElementById('sync-status');
+  if(!el){
+    el = document.createElement('div');
+    el.id = 'sync-status';
+    el.style.cssText = 'position:fixed;bottom:16px;right:16px;padding:8px 16px;border-radius:6px;font-size:13px;font-family:var(--sans);z-index:9999;transition:opacity .5s;';
+    document.body.appendChild(el);
+  }
+  el.style.opacity = '1';
+  el.style.background = tipo==='ok' ? '#e6f2ea' : tipo==='err' ? '#f5e8e8' : '#e6eef5';
+  el.style.color = tipo==='ok' ? '#1e5c32' : tipo==='err' ? '#8b2020' : '#1a3d5c';
+  el.style.border = `1px solid ${tipo==='ok'?'#1e5c32':tipo==='err'?'#8b2020':'#1a3d5c'}`;
+  el.textContent = msg;
+  if(tipo==='ok') setTimeout(()=>{ el.style.opacity='0'; }, 3000);
+}
+
+async function caricaDaCloud(){
+  mostraSync('Caricamento dati...', 'info');
+  try {
+    const tabs = ['abbattimenti','stock','disc','biometria','uscite','stagione','destinatari'];
+    const results = await Promise.all(tabs.map(t =>
+      fetch(`${GS_URL}?tabella=${t}`).then(r=>r.json())
+    ));
+    if(results[0].righe && results[0].righe.length) ABBATTIMENTI = results[0].righe;
+    if(results[1].righe && results[1].righe.length) stockFascette = results[1].righe;
+    if(results[2].righe && results[2].righe.length){
+      results[2].righe.forEach(([nome, disc]) => {
+        const e = ERADICATORI.find(x=>x[1]===nome);
+        if(e && disc) e[2] = disc;
+      });
+    }
+    if(results[3].righe && results[3].righe.length) BIOMETRIA = results[3].righe;
+    if(results[4].righe && results[4].righe.length) USCITE = results[4].righe;
+    if(results[5].righe && results[5].righe.length){
+      const s = results[5].righe[0];
+      if(s && s[0]){
+        const el = document.getElementById('stagione-label');
+        if(el) el.textContent = 'Stagione ' + s[0];
+        document.title = 'Gestionale Caccia al Cinghiale ' + s[0];
+      }
+    }
+    if(results[6].righe && results[6].righe.length) DESTINATARI = results[6].righe;
+    mostraSync('Dati aggiornati', 'ok');
+  } catch(err) {
+    mostraSync('Errore caricamento - lavoro offline', 'err');
+  }
+  renderErad(); renderBlocchi(); renderStock();
+  renderAbbattimenti(); renderDashAbbattimenti();
+  renderBiometria(); renderUscite(); renderDashUscite();
+  popolaBioSelect(); renderDestinatari(); initWADate();
+}
+
+async function salvaSuCloud(tabella, dati){
+  mostraSync('Salvataggio...', 'info');
+  try {
+    await fetch(GS_URL, {
+      method: 'POST',
+      body: JSON.stringify({tabella, azione:'salva', righe:dati})
+    });
+    mostraSync('Salvato', 'ok');
+  } catch(err) {
+    mostraSync('Errore salvataggio', 'err');
+  }
+}
+
+function salvaAbbattimentiCloud(){ salvaSuCloud('abbattimenti', ABBATTIMENTI); }
+function salvaStockCloud(){ salvaSuCloud('stock', stockFascette); }
+function salvaDiscCloud(){
+  const disc = ERADICATORI.filter(e=>e[2]).map(e=>[e[1],e[2]]);
+  salvaSuCloud('disc', disc);
+}
+
+
+// ---- Render postazioni (dynamic from POSTAZIONI_MAP) ----
+// ---- Postazioni table with inline lat/lon editing ----
+let _postSortField = 'nome', _postSortDir = 1;
+
+function sortPostazioni(field){
+  if(_postSortField === field) _postSortDir *= -1;
+  else { _postSortField = field; _postSortDir = 1; }
+  renderPostazioniTable();
+}
+
+function renderPostazioniTable(){
+  const tbody = document.getElementById('tbody-postazioni');
+  if(!tbody) return;
+  const rows = [];
+  // Flatten to array for sorting
+  const flat = [];
+  Object.entries(POSTAZIONI_MAP).forEach(([nome, posti])=>{
+    posti.forEach((p, pi)=>{ flat.push({nome, p, pi}); });
+  });
+  flat.sort((a,b)=>{
+    let va, vb;
+    if(_postSortField==='lat'){ va=parseFloat(a.p.lat)||0; vb=parseFloat(b.p.lat)||0; }
+    else { va=a.nome; vb=b.nome; }
+    return (va<vb?-1:va>vb?1:0)*_postSortDir;
+  });
+
+  flat.forEach(({nome, p, pi})=>{
+    const latStyle = p.lat ? '' : 'color:var(--text-faint);';
+    const lonStyle = p.lon ? '' : 'color:var(--text-faint);';
+    const nomeSafe = nome.replace(/'/g,"\\'");
+    rows.push(`<tr>
+      <td>${nome}</td>
+      <td>${p.l}</td>
+      <td style="font-family:var(--mono);font-size:11px">${p.p||'volante'}</td>
+      <td>${p.luce||'-'}</td>
+      <td style="font-size:12px">${p.arma||'-'}</td>
+      <td style="font-family:var(--mono);font-size:11px;${latStyle}cursor:pointer;border-bottom:1px dashed var(--border-strong);"
+          onclick="editCoord(this,'${nomeSafe}',${pi},'lat')"
+          title="Clicca per modificare">${p.lat||'— inserire'}</td>
+      <td style="font-family:var(--mono);font-size:11px;${lonStyle}cursor:pointer;border-bottom:1px dashed var(--border-strong);"
+          onclick="editCoord(this,'${nomeSafe}',${pi},'lon')"
+          title="Clicca per modificare">${p.lon||'— inserire'}</td>
+    </tr>`);
+  });
+  tbody.innerHTML = rows.join('');
+}
+
+function editCoord(cell, nome, pi, field){
+  if(cell.querySelector('input')) return;
+  const entry = (POSTAZIONI_MAP[nome]||[])[pi];
+  if(!entry) return;
+  const cur = entry[field] || '';
+  cell.innerHTML = `<input type="text" value="${cur}"
+    placeholder="es. 45.931325"
+    style="font-family:var(--mono);font-size:11px;padding:2px 6px;border:1px solid var(--accent);border-radius:4px;background:var(--surface);color:var(--text);width:110px;"
+    onblur="salvaCoord(this,'${nome.replace(/'/g,"\\'")}',${pi},'${field}')"
+    onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')renderPostazioniTable();" />`;
+  cell.querySelector('input').focus();
+  cell.querySelector('input').select();
+}
+
+function salvaCoord(input, nome, pi, field){
+  const val = input.value.trim();
+  const entry = (POSTAZIONI_MAP[nome]||[])[pi];
+  if(entry){ entry[field] = val; }
+  renderPostazioniTable();
+}
+
+// ---- Stagione editable ----
+function editStagione(){
+  const el = document.getElementById('stagione-label');
+  if(el.querySelector('input')) return;
+  const cur = el.textContent.replace('Stagione ','').trim();
+  el.innerHTML = `<input type="text" value="${cur}" style="font-size:11px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,0.1);color:#f0ede6;border:1px solid rgba(255,255,255,0.3);width:120px;" onblur="salvaStagione(this)" onkeydown="if(event.key==='Enter')this.blur();" />`;
+  el.querySelector('input').focus();
+  el.querySelector('input').select();
+}
+function salvaStagione(input){
+  const val = input.value.trim();
+  const el = document.getElementById('stagione-label');
+  el.textContent = val ? 'Stagione ' + val : 'Stagione 2025 / 2026';
+  el.onclick = editStagione;
+  document.title = 'Gestionale Caccia al Cinghiale ' + (val||'2025/2026');
+  salvaSuCloud('stagione', [[val||'2025/2026']]);
+}
+
+// ---- ID eradicatore editable ----
+function editId(span, eidx){
+  if(span.querySelector('input')) return;
+  const e = ERADICATORI[eidx];
+  if(!e) return;
+  const cur = e[0] || '';
+  span.innerHTML = `<input type="text" value="${cur}" style="font-size:12px;padding:2px 6px;border:1px solid var(--accent);border-radius:4px;background:var(--surface);color:var(--text);width:60px;" onblur="salvaId(this,${eidx})" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')renderErad();" />`;
+  span.querySelector('input').focus();
+}
+function salvaId(input, eidx){
+  const val = input.value.trim();
+  const e = ERADICATORI[eidx];
+  if(e){ e[0] = val ? (isNaN(val)?val:parseInt(val)) : null; }
+  renderErad();
+}
+
+// ---- Abbattimenti: sort by column ----
+let _abSortDir = 1;
+function sortAbbattimenti(col){
+  ABBATTIMENTI.sort((a,b)=>{
+    let va=a[col], vb=b[col];
+    if(col===4){ // date dd/mm/yyyy
+      va = va ? va.split('/').reverse().join('') : '';
+      vb = vb ? vb.split('/').reverse().join('') : '';
+    }
+    if(va<vb) return -_abSortDir;
+    if(va>vb) return _abSortDir;
+    return 0;
+  });
+  _abSortDir *= -1;
+  renderAbbattimenti();
+}
+
+// ---- Biometria: auto-populate from abbattimento ----
+function autoPopBio(idx){
+  const ab = ABBATTIMENTI[idx];
+  if(!ab) return;
+  document.getElementById('bio-cacciatore').value = ab[1]||'';
+  document.getElementById('bio-localita').value = ab[2]||'';
+  document.getElementById('bio-data').value = ab[4] ? ab[4].split('/').reverse().join('-') : '';
+  document.getElementById('bio-sesso').value = ab[5]||'FA';
+}
+
+
+// ---- Render uscite ----
+let _usciteSortDir = -1;
+function sortUscite(){
+  USCITE.sort((a,b)=>{
+    const da = a[5].split('/').reverse().join('');
+    const db = b[5].split('/').reverse().join('');
+    return (da<db?-1:da>db?1:0)*_usciteSortDir;
+  });
+  _usciteSortDir *= -1;
+  renderUscite();
+renderDashUscite();
+}
+
+let USCITE = [...USCITE_INIT];
+
+function renderUscite(){
+  const tbody = document.getElementById('tbody-uscite');
+  if(!tbody) return;
+  tbody.innerHTML = USCITE.map((r,i)=>{
+    const luce = r[3]==='FARO'
+      ? `<span class="badge b-warn">FARO</span>`
+      : r[3]==='VISORE' ? `<span class="badge b-info">VISORE</span>`
+      : `<span class="badge b-gray">${r[3]||'-'}</span>`;
+    return `<tr>
+      <td>${r[0]}</td><td>${r[1]}</td>
+      <td style="font-family:var(--mono);font-size:11px">${r[2]||'volante'}</td>
+      <td>${luce}</td>
+      <td style="font-size:12px">${r[4]}</td>
+      <td style="font-family:var(--mono);font-size:11px">${r[5]}</td>
+      <td style="font-family:var(--mono);font-size:11px">${r[6]}</td>
+      <td style="white-space:nowrap;">
+        <button onclick="eliminaUscita(${i})" title="Elimina" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:14px;padding:2px 4px;">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+  const tot = USCITE.length;
+  const faro = USCITE.filter(u=>u[3]==='FARO').length;
+  const visore = USCITE.filter(u=>u[3]==='VISORE').length;
+  const volanti = USCITE.filter(u=>!u[2]||u[2]==='volante').length;
+  const el = id => document.getElementById(id);
+  if(el('m-uscite')) el('m-uscite').textContent = tot;
+  if(el('m-faro')) el('m-faro').textContent = faro;
+  if(el('m-visore')) el('m-visore').textContent = visore;
+  if(el('m-volanti-usc')) el('m-volanti-usc').textContent = volanti;
+}
+
+function eliminaUscita(i){
+  if(!confirm(`Eliminare l'uscita di ${USCITE[i][0]} del ${USCITE[i][5]}?`)) return;
+  USCITE.splice(i,1);
+  renderUscite();
+  renderDashUscite();
+  salvaSuCloud('uscite', USCITE);
+}
+
+// ---- Biometria ----
+// [n, cacciatore, localita, data, sesso, ltt, pesop, pesov]
+let BIOMETRIA = [];
+
+function renderBiometria(){
+  const tbody = document.getElementById('tbody-biometria');
+  if(!tbody) return;
+  const sorted = [...BIOMETRIA].sort((a,b)=>{
+    const da=a[3]?a[3].split('/').reverse().join(''):'';
+    const db=b[3]?b[3].split('/').reverse().join(''):'';
+    return da<db?-1:da>db?1:0;
+  });
+  tbody.innerHTML = sorted.map((r,pos)=>{
+    const sc = r[4]==='F1'||r[4]==='FA'?'b-warn':r[4]==='M1'||r[4]==='MA'?'b-ok':'b-info';
+    const origIdx = BIOMETRIA.indexOf(r);
+    return `<tr>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text-faint)">${pos+1}</td>
+      <td>${r[1]}</td><td>${r[2]}</td>
+      <td style="font-family:var(--mono);font-size:11px">${r[3]}</td>
+      <td><span class="badge ${sc}">${r[4]}</span></td>
+      <td style="font-family:var(--mono);font-size:11px">${r[5]||'-'}</td>
+      <td style="font-family:var(--mono);font-size:11px">${r[6]||'-'}</td>
+      <td style="font-family:var(--mono);font-size:11px">${r[7]||'-'}</td>
+      <td style="white-space:nowrap;">
+        <button onclick="eliminaBio(${origIdx})" title="Elimina" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:14px;padding:2px 4px;">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function eliminaBio(i){
+  if(!confirm(`Eliminare la registrazione biometrica di ${BIOMETRIA[i][1]}?`)) return;
+  BIOMETRIA.splice(i,1);
+  renderBiometria();
+  salvaSuCloud('biometria', BIOMETRIA);
+}
+
+function salvaBiometria(){
+  const cacciatore = document.getElementById('bio-cacciatore').value.trim();
+  const localita   = document.getElementById('bio-localita').value.trim();
+  const data       = document.getElementById('bio-data').value;
+  const sesso      = document.getElementById('bio-sesso').value;
+  const ltt        = document.getElementById('bio-ltt').value.trim();
+  const pesop      = document.getElementById('bio-pesop').value.trim();
+  const pesov      = document.getElementById('bio-pesov').value.trim();
+  if(!cacciatore||!data){ alert('Inserisci almeno cacciatore e data.'); return; }
+  const dataFmt = data.split('-').reverse().join('/');
+  BIOMETRIA.push([BIOMETRIA.length+1, cacciatore, localita, dataFmt, sesso, ltt, pesop, pesov]);
+  renderBiometria();
+  salvaSuCloud('biometria', BIOMETRIA);
+  // reset form
+  ['bio-cacciatore','bio-localita','bio-ltt','bio-pesop','bio-pesov'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+  document.getElementById('bio-data').value='';
+  document.getElementById('bio-sesso').value='FA';
+  const sel=document.querySelector('#t-biometria select');if(sel)sel.value='';
+  alert('Biometria salvata.');
+}
+
+function renderDashUscite(){
+  const tbody = document.getElementById('dash-tbody-uscite');
+  if(!tbody) return;
+  const ultimi = [...USCITE].sort((a,b)=>{
+    const da=a[5].split('/').reverse().join('');
+    const db=b[5].split('/').reverse().join('');
+    return da<db?1:da>db?-1:0;
+  }).slice(0,5);
+  tbody.innerHTML = ultimi.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td style="font-family:var(--mono);font-size:11px">${r[5]}</td><td style="font-family:var(--mono);font-size:11px">${r[6]}</td></tr>`).join('');
+  const el = document.getElementById('dash-uscite-count');
+  if(el) el.textContent = USCITE.length;
+}
+// ---- WhatsApp ----
+let DESTINATARI = [];
+
+function renderDestinatari(){
+  const sel = document.getElementById('wa-dest');
+  const lista = document.getElementById('wa-lista-dest');
+  if(!sel || !lista) return;
+  sel.innerHTML = '<option value="">— seleziona —</option>';
+  DESTINATARI.forEach((d,i)=>{
+    const o = document.createElement('option');
+    o.value = d.numero;
+    o.textContent = d.nome;
+    sel.appendChild(o);
+  });
+  lista.innerHTML = DESTINATARI.length
+    ? DESTINATARI.map((d,i)=>`
+        <div style="display:flex;align-items:center;gap:12px;padding:8px 0;border-bottom:0.5px solid var(--border);">
+          <div style="flex:1;font-size:13px;"><strong>${d.nome}</strong> <span style="color:var(--text-muted);font-family:var(--mono);font-size:12px;">+${d.numero}</span></div>
+          <button onclick="rimuoviDestinatario(${i})" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:14px;">✕</button>
+        </div>`).join('')
+    : '<p style="font-size:13px;color:var(--text-muted);">Nessun destinatario. Aggiungine uno qui sopra.</p>';
+}
+
+function aggiungiDestinatario(){
+  const nome = document.getElementById('wa-nome').value.trim();
+  const numero = document.getElementById('wa-numero').value.trim().replace(/\D/g,'');
+  const fb = document.getElementById('wa-dest-feedback');
+  if(!nome || !numero){ fb.innerHTML='<div class="alert alert-danger">Inserisci nome e numero.</div>'; return; }
+  DESTINATARI.push({nome, numero});
+  document.getElementById('wa-nome').value='';
+  document.getElementById('wa-numero').value='';
+  fb.innerHTML=`<div class="alert alert-ok"><strong>${nome}</strong> aggiunto.</div>`;
+  setTimeout(()=>fb.innerHTML='', 3000);
+  renderDestinatari();
+  salvaSuCloud('destinatari', DESTINATARI);
+}
+
+function rimuoviDestinatario(i){
+  DESTINATARI.splice(i,1);
+  renderDestinatari();
+  salvaSuCloud('destinatari', DESTINATARI);
+}
+
+function formattaUscitePerWA(data){
+  // data in formato yyyy-mm-dd da input type=date
+  const parts = data.split('-');
+  const dataFmt = `${parts[2]}/${parts[1]}/${parts[0]}`;
+  const usciteGiorno = USCITE.filter(u => u[5] === dataFmt);
+  if(!usciteGiorno.length) return null;
+  const oggi = new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
+  let msg = `*Uscite caccia al cinghiale - ${dataFmt}*\n\n`;
+  usciteGiorno.forEach(u=>{
+    msg += `• ${u[0]} - ${u[1]}`;
+    if(u[2] && u[2]!=='volante') msg += ` (posta ${u[2]})`;
+    msg += `\n  ${u[3]} | ${u[6]}\n`;
+  });
+  msg += `\n_Gestionale caccia al cinghiale_`;
+  return msg;
+}
+
+function anteprima(){
+  const data = document.getElementById('wa-data').value;
+  const prev = document.getElementById('wa-preview');
+  if(!data){ prev.style.display='block'; prev.textContent='Seleziona una data.'; return; }
+  const msg = formattaUscitePerWA(data);
+  prev.style.display='block';
+  prev.textContent = msg || `Nessuna uscita registrata per questa data.`;
+}
+
+function inviaWA(){
+  const data = document.getElementById('wa-data').value;
+  const numero = document.getElementById('wa-dest').value;
+  if(!data){ alert('Seleziona una data.'); return; }
+  if(!numero){ alert('Seleziona un destinatario.'); return; }
+  const msg = formattaUscitePerWA(data);
+  if(!msg){ alert('Nessuna uscita registrata per questa data.'); return; }
+  const url = `https://wa.me/${numero}?text=${encodeURIComponent(msg)}`;
+  window.open(url, '_blank');
+}
+
+// Set today as default date for WhatsApp
+function initWADate(){
+  const el = document.getElementById('wa-data');
+  if(!el) return;
+  const today = new Date();
+  const yyyy = today.getFullYear();
+  const mm = String(today.getMonth()+1).padStart(2,'0');
+  const dd = String(today.getDate()).padStart(2,'0');
+  el.value = `${yyyy}-${mm}-${dd}`;
+}
+
+// ---- Init ----
+setDate();
+popolaSelect();
+caricaDaCloud();
+renderPostazioniTable();
+renderUscite();
+renderDashUscite();
+renderDestinatari();
+initWADate();
+// Populate biometria abbattimento select
+function popolaBioSelect(){
+  const sel = document.querySelector('#t-biometria select');
+  if(!sel) return;
+  sel.innerHTML = '<option value="">-- seleziona abbattimento --</option>';
+  ABBATTIMENTI.forEach((ab,i)=>{
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = `${ab[1]} - ${ab[4]} (${ab[5]})`;
+    sel.appendChild(o);
+  });
+}
+popolaBioSelect();
+</script>
+</body>
+</html>
