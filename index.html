@@ -164,7 +164,7 @@
     border-radius: var(--radius-lg);
     padding: 16px;
   }
-  .metric .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; }
+  .metric .lbl { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 6px; min-height: 2.4em; display: flex; align-items: flex-end; }
   .metric .val { font-family: var(--mono); font-size: 26px; font-weight: 500; }
   .metric .val.danger { color: var(--danger); }
   .metric .val.ok { color: var(--ok); }
@@ -461,6 +461,7 @@
       </div>
       <div class="search-wrap">
         <input class="search-input" type="text" placeholder="Cerca controllore o località..." oninput="filterTable('tab-uscite',this.value)"/>
+        <button class="btn btn-secondary" onclick="esportaExcel('uscite')" style="white-space:nowrap;font-size:12px;">↓ Excel</button>
       </div>
       <div class="card">
         <div class="table-wrap">
@@ -472,6 +473,9 @@
 
     <!-- ===== ABBATTIMENTI ===== -->
     <div id="abbattimenti" class="section">
+      <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+        <button class="btn btn-secondary" onclick="esportaExcel('abbattimenti')" style="font-size:12px;">↓ Excel</button>
+      </div>
       <div class="card">
         <div class="table-wrap">
           <table><thead><tr><th>N.</th><th>Cacciatore</th><th>Località</th><th>Posta</th><th style="cursor:pointer;" onclick="sortAbbattimenti(4)" title="Ordina per data">Data ↕</th><th>Sesso</th><th>Tipo</th><th>Fascetta</th><th></th></tr></thead>
@@ -1238,16 +1242,43 @@ function salvaUscita(){
     document.getElementById('save-uscita-ok').innerHTML='<div class="alert alert-danger">Seleziona prima una postazione.</div>';
     return;
   }
-  document.getElementById('save-uscita-ok').innerHTML='<div class="alert alert-ok"><strong>Uscita salvata</strong> nel registro. Ricorda di aggiornare anche il file Excel.</div>';
-  // Reset form
+  const nome = document.getElementById('sel-erad-uscita').value;
+  const luce = document.getElementById('in-luce').value;
+  const arma = document.getElementById('in-arma').value.trim();
+  const dataVal = document.getElementById('in-data-uscita').value;
+  const orario = document.getElementById('in-orario').value.trim();
+
+  if(!dataVal){ document.getElementById('save-uscita-ok').innerHTML='<div class="alert alert-danger">Inserisci la data dell\'uscita.</div>'; return; }
+
+  const dataFmt = dataVal.split('-').reverse().join('/');
+  let localita, posta;
+  if(_postazioneSelezionata.tipo==='volante'){
+    localita = document.getElementById('in-toponimo-volante').value.trim() || 'volante';
+    posta = '';
+  } else {
+    localita = _postazioneSelezionata.l;
+    posta = _postazioneSelezionata.p;
+  }
+  // arma: usa quella della postazione se non specificata
+  const armaFinale = arma || _postazioneSelezionata.arma || '';
+
+  USCITE.push([nome, localita, posta, luce, armaFinale, dataFmt, orario]);
+  renderUscite();
+  renderDashUscite();
+  salvaSuCloud('uscite', USCITE);
+
+  document.getElementById('save-uscita-ok').innerHTML='<div class="alert alert-ok"><strong>Uscita salvata</strong> nel registro.</div>';
   setTimeout(()=>{
     document.getElementById('sel-erad-uscita').value='';
     document.getElementById('esito-verifica').innerHTML='';
     document.getElementById('form-postazione').style.display='none';
     document.getElementById('form-uscita-rest').style.display='none';
     document.getElementById('postazione-selezionata').style.display='none';
+    document.getElementById('in-arma').value='';
+    document.getElementById('in-data-uscita').value='';
+    document.getElementById('in-orario').value='';
     _postazioneSelezionata=null;
-  }, 3000);
+  }, 2000);
 }
 
 // ---- Magazzino ----
@@ -1920,6 +1951,29 @@ function renderDashUscite(){
   const el = document.getElementById('dash-uscite-count');
   if(el) el.textContent = USCITE.length;
 }
+// ---- Export Excel (CSV scaricabile) ----
+function esportaExcel(tipo){
+  let intestazione, righe, nomeFile;
+  if(tipo==='uscite'){
+    intestazione = ['Controllore','Localita','Posta','Luce','Arma','Data','Orario'];
+    righe = USCITE;
+    nomeFile = 'uscite_cinghiale.csv';
+  } else {
+    intestazione = ['N','Cacciatore','Localita','Posta','Data','Sesso','Tipo','Fascetta'];
+    righe = [...ABBATTIMENTI].sort((a,b)=>parseData(a[4])-parseData(b[4]));
+    nomeFile = 'abbattimenti_cinghiale.csv';
+  }
+  const sep = ';';
+  const bom = '\uFEFF'; // BOM per Excel italiano
+  const csv = bom + intestazione.join(sep) + '\n' +
+    righe.map(r => r.map(v => `"${String(v||'').replace(/"/g,'""')}"`).join(sep)).join('\n');
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nomeFile; a.click();
+  URL.revokeObjectURL(url);
+}
+
 // ---- WhatsApp ----
 let DESTINATARI = [];
 
