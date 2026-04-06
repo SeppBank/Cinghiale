@@ -2037,9 +2037,9 @@ function formattaUscitePerWA(data){
   usciteGiorno.forEach(u=>{
     msg += `• ${u[0]} - ${u[1]}`;
     if(u[2] && u[2]!=='volante') msg += ` (posta ${u[2]})`;
-    msg += `\n  ${u[3]} | ${u[6]}\n`;
+    msg += `\n  ${u[3]} | orario: ${u[6]}\n`;
   });
-  msg += `\n_Gestionale caccia al cinghiale_`;
+  msg += `\n_R.A. 20 - MIANE_`;
   return msg;
 }
 
