@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Gestionale Caccia al Cinghiale 2025/2026</title>
+<title>Gestionale Selezione del Cinghiale 2026/2027</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
 
@@ -374,9 +374,9 @@
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-header">
-    <div class="sidebar-logo">Caccia al Cinghiale</div>
+    <div class="sidebar-logo">Selezione Cinghiale</div>
     <div class="sidebar-title">Gestionale</div>
-    <div class="sidebar-season" id="stagione-label" onclick="editStagione()" title="Clicca per modificare" style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,0.2);">Stagione 2025 / 2026</div>
+    <div class="sidebar-season" id="stagione-label" onclick="editStagione()" title="Clicca per modificare" style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,0.2);">Stagione 2026 / 2027</div>
   </div>
   <div class="nav-group">
     <div class="nav-label">Generale</div>
@@ -1671,7 +1671,7 @@ async function caricaDaCloud(){
       if(s && s[0]){
         const el = document.getElementById('stagione-label');
         if(el) el.textContent = 'Stagione ' + s[0];
-        document.title = 'Gestionale Caccia al Cinghiale ' + s[0];
+        document.title = 'Gestionale Selezione del Cinghiale ' + s[0];
       }
     }
     if(results[6].righe && results[6].righe.length) DESTINATARI = results[6].righe;
@@ -1786,9 +1786,9 @@ function editStagione(){
 function salvaStagione(input){
   const val = input.value.trim();
   const el = document.getElementById('stagione-label');
-  el.textContent = val ? 'Stagione ' + val : 'Stagione 2025 / 2026';
+  el.textContent = val ? 'Stagione ' + val : 'Stagione 2026 / 2027';
   el.onclick = editStagione;
-  document.title = 'Gestionale Caccia al Cinghiale ' + (val||'2025/2026');
+  document.title = 'Gestionale Selezione del Cinghiale ' + (val||'2025/2026');
   salvaSuCloud('stagione', [[val||'2025/2026']]);
 }
 
@@ -2033,7 +2033,7 @@ function formattaUscitePerWA(data){
   const usciteGiorno = USCITE.filter(u => u[5] === dataFmt);
   if(!usciteGiorno.length) return null;
   const oggi = new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
-  let msg = `*Uscite caccia al cinghiale - ${dataFmt}*\n\n`;
+  let msg = `*Uscite Selezione del cinghiale - ${dataFmt}*\n\n`;
   usciteGiorno.forEach(u=>{
     msg += `• ${u[0]} - ${u[1]}`;
     if(u[2] && u[2]!=='volante') msg += ` (posta ${u[2]})`;
