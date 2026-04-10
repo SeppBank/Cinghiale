@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>Gestionale Selezione del Cinghiale 2026/2027</title>
+<title>Gestionale Caccia al Cinghiale 2025/2026</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500;600&display=swap');
 
@@ -374,9 +374,9 @@
 <!-- SIDEBAR -->
 <aside class="sidebar">
   <div class="sidebar-header">
-    <div class="sidebar-logo">Selezione Cinghiale</div>
+    <div class="sidebar-logo">Caccia al Cinghiale</div>
     <div class="sidebar-title">Gestionale</div>
-    <div class="sidebar-season" id="stagione-label" onclick="editStagione()" title="Clicca per modificare" style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,0.2);">Stagione 2026 / 2027</div>
+    <div class="sidebar-season" id="stagione-label" onclick="editStagione()" title="Clicca per modificare" style="cursor:pointer;border-bottom:1px dashed rgba(255,255,255,0.2);">Stagione 2025 / 2026</div>
   </div>
   <div class="nav-group">
     <div class="nav-label">Generale</div>
@@ -1338,6 +1338,7 @@ function assegnaFascetta(){
     stockFascette=stockFascette.filter(x=>x!==nF);
     renderStock(); renderErad(); renderBlocchi();
     salvaStockCloud();
+    salvaFaszetteCloud();
     const dateStr=data.split('-').reverse().join('/');
     fb.innerHTML=`<div class="alert alert-ok"><strong>Fascetta ${nF}</strong> assegnata a <strong>${dest}</strong> in data ${dateStr}.</div>`;
     document.getElementById('sel-dest').value='';
@@ -1652,7 +1653,7 @@ function mostraSync(msg, tipo){
 async function caricaDaCloud(){
   mostraSync('Caricamento dati...', 'info');
   try {
-    const tabs = ['abbattimenti','stock','disc','biometria','uscite','stagione','destinatari'];
+    const tabs = ['abbattimenti','stock','disc','biometria','uscite','stagione','destinatari','fascette'];
     const results = await Promise.all(tabs.map(t =>
       fetch(`${GS_URL}?tabella=${t}`).then(r=>r.json())
     ));
@@ -1671,10 +1672,19 @@ async function caricaDaCloud(){
       if(s && s[0]){
         const el = document.getElementById('stagione-label');
         if(el) el.textContent = 'Stagione ' + s[0];
-        document.title = 'Gestionale Selezione del Cinghiale ' + s[0];
+        document.title = 'Gestionale Caccia al Cinghiale ' + s[0];
       }
     }
     if(results[6].righe && results[6].righe.length) DESTINATARI = results[6].righe;
+    // Carica fascette assegnate agli eradicatori dal cloud
+    if(results[7].righe && results[7].righe.length){
+      results[7].righe.forEach(([nome, fascetteJson]) => {
+        const e = ERADICATORI.find(x=>x[1]===nome);
+        if(e && fascetteJson){
+          try { e[3] = JSON.parse(fascetteJson); } catch(ex){}
+        }
+      });
+    }
     mostraSync('Dati aggiornati', 'ok');
   } catch(err) {
     mostraSync('Errore caricamento - lavoro offline', 'err');
@@ -1700,6 +1710,10 @@ async function salvaSuCloud(tabella, dati){
 
 function salvaAbbattimentiCloud(){ salvaSuCloud('abbattimenti', ABBATTIMENTI); }
 function salvaStockCloud(){ salvaSuCloud('stock', stockFascette); }
+function salvaFaszetteCloud(){
+  const dati = ERADICATORI.filter(e=>e[3]&&e[3].length).map(e=>[e[1], JSON.stringify(e[3])]);
+  salvaSuCloud('fascette', dati);
+}
 function salvaDiscCloud(){
   const disc = ERADICATORI.filter(e=>e[2]).map(e=>[e[1],e[2]]);
   salvaSuCloud('disc', disc);
@@ -1786,9 +1800,9 @@ function editStagione(){
 function salvaStagione(input){
   const val = input.value.trim();
   const el = document.getElementById('stagione-label');
-  el.textContent = val ? 'Stagione ' + val : 'Stagione 2026 / 2027';
+  el.textContent = val ? 'Stagione ' + val : 'Stagione 2025 / 2026';
   el.onclick = editStagione;
-  document.title = 'Gestionale Selezione del Cinghiale ' + (val||'2025/2026');
+  document.title = 'Gestionale Caccia al Cinghiale ' + (val||'2025/2026');
   salvaSuCloud('stagione', [[val||'2025/2026']]);
 }
 
@@ -2033,7 +2047,7 @@ function formattaUscitePerWA(data){
   const usciteGiorno = USCITE.filter(u => u[5] === dataFmt);
   if(!usciteGiorno.length) return null;
   const oggi = new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
-  let msg = `*Uscite Selezione del cinghiale - ${dataFmt}*\n\n`;
+  let msg = `*Uscite caccia al cinghiale - ${dataFmt}*\n\n`;
   usciteGiorno.forEach(u=>{
     msg += `• ${u[0]} - ${u[1]}`;
     if(u[2] && u[2]!=='volante') msg += ` (posta ${u[2]})`;
