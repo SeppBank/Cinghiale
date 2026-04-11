@@ -834,7 +834,7 @@ const ERADICATORI = [
   [45,'Bottarel Federico','11/08/2025',[{n:1491,c:'08/08/2025',u:'10/09/2025'},{n:1498,c:'11/09/2025',u:'07/01/2026'},{n:1982,c:'08/01/2026',u:null}]],
   [null,'CALLEGARI FRANCO',null,[]],
   [3,'Codognotto Flavio','18/09/2025',[{n:1962,c:'18/09/2025',u:null}]],
-  [4,'Dal Vecchio Renato','28/04/2025',[{n:755,c:'28/04/2025',u:'20/06/2025'},{n:780,c:'22/06/2025',u:'23/07/2025'},{n:770,c:'24/07/2025',u:'05/08/2025'},{n:1482,c:'29/07/2025',u:null}]],
+  [4,'Dal Vecchio Renato','28/04/2025',[{n:755,c:'28/04/2025',u:'20/06/2025'},{n:780,c:'22/06/2025',u:'23/07/2025'},{n:770,c:'24/07/2025',u:'05/08/2025'},{n:1482,c:'29/07/2025',u:'27/01/2026'}]],
   [5,"Dall'Antonia Mauro",'28/04/2025',[]],
   [6,"Dall'Arche Samuele",'19/09/2025',[{n:1963,c:'19/09/2025',u:null}]],
   [7,'Dalle Molle Valter','11/10/2025',[{n:1969,c:'11/10/2025',u:null}]],
@@ -955,8 +955,12 @@ function renderErad(){
       if(!fasc.length) mm.push('nessuna fascetta');
       badge=`<span class="badge b-danger">Bloccato</span> <span style="font-size:11px;color:var(--danger);margin-left:4px">${mm.join(' · ')}</span>`;
     }
+    const eidx = ERADICATORI.indexOf(e);
     const fascChips = disp.length
-      ? disp.map(f=>`<span class="fasc-chip">${f.n}</span>`).join('')
+      ? disp.map(f=>{
+          const fidx = e[3].indexOf(f);
+          return `<span class="fasc-chip" style="cursor:pointer;" onclick="marcaUsata(${eidx},${fidx})" title="Clicca per marcare come utilizzata">${f.n} <span style="font-size:10px;opacity:.6;">✕</span></span>`;
+        }).join('')
       : '<span style="color:var(--text-faint);font-size:12px">-</span>';
 
     const discCell = disc
@@ -969,6 +973,19 @@ function renderErad(){
 }
 function filtroErad(q){_eradQ=q.toLowerCase();renderErad();}
 function filtroEradStato(v){_eradS=v;renderErad();}
+
+function marcaUsata(eidx, fidx){
+  const e = ERADICATORI[eidx];
+  if(!e) return;
+  const f = e[3][fidx];
+  if(!f) return;
+  const oggi = new Date();
+  const dataOggi = `${String(oggi.getDate()).padStart(2,'0')}/${String(oggi.getMonth()+1).padStart(2,'0')}/${oggi.getFullYear()}`;
+  if(!confirm(`Marcare la fascetta ${f.n} di ${e[1]} come utilizzata in data ${dataOggi}?`)) return;
+  f.u = dataOggi;
+  renderErad(); renderBlocchi();
+  salvaFaszetteCloud();
+}
 
 // ---- Modifica disciplinare inline ----
 function editDisc(span, nome){
@@ -1198,9 +1215,20 @@ function salvaAbbattimento(){
   const n = ABBATTIMENTI.length + 1;
   ABBATTIMENTI.push([n, cacciatore, localita, posta, dataFmt, sesso, tipo, fascetta]);
 
+  // Marca automaticamente la fascetta come utilizzata nella scheda Abilitati
+  const nFasc = parseInt(fascetta);
+  if(!isNaN(nFasc)){
+    ERADICATORI.forEach(e => {
+      const f = e[3].find(x => x.n === nFasc && !x.u);
+      if(f){ f.u = dataFmt; }
+    });
+    salvaFaszetteCloud();
+  }
+
   fb.innerHTML=`<div class="alert alert-ok"><strong>Abbattimento n.${n} salvato.</strong> ${cacciatore} - ${dataFmt} - ${tipoBadge(tipo)} - fascetta <span class="fasc-chip">${fascetta}</span></div>`;
   resetAbbattimentoForm();
   renderAbbattimenti();
+  renderErad(); renderBlocchi();
   salvaAbbattimentiCloud();
   setTimeout(()=>fb.innerHTML='', 5000);
 }
