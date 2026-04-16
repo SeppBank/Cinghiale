@@ -2069,17 +2069,17 @@ function rimuoviDestinatario(i){
 }
 
 function formattaUscitePerWA(data){
-  // data in formato yyyy-mm-dd da input type=date
   const parts = data.split('-');
   const dataFmt = `${parts[2]}/${parts[1]}/${parts[0]}`;
   const usciteGiorno = USCITE.filter(u => u[5] === dataFmt);
   if(!usciteGiorno.length) return null;
-  const oggi = new Date().toLocaleDateString('it-IT',{weekday:'long',day:'numeric',month:'long'});
   let msg = `*Uscite caccia al cinghiale - ${dataFmt}*\n\n`;
   usciteGiorno.forEach(u=>{
-    msg += `• ${u[0]} - ${u[1]}`;
-    if(u[2] && u[2]!=='volante') msg += ` (posta ${u[2]})`;
-    msg += `\n  ${u[3]} | orario: ${u[6]}\n`;
+    let riga = `• ${u[0]}`;
+    if(u[1]) riga += ` - ${u[1]}`;
+    if(u[2] && u[2]!=='volante') riga += ` (posta ${u[2]})`;
+    riga += ` - orario: ${u[6]}`;
+    msg += riga + '\n';
   });
   msg += `\n_R.A. 20 - MIANE_`;
   return msg;
