@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -694,10 +695,6 @@
         <div class="card">
           <div class="card-head"><h3>Nuovo abbattimento</h3></div>
           <div class="card-body">
-            <div class="form-row">
-              <div class="form-group"><label>Cacciatore</label><input id="ab-cacciatore" type="text" placeholder="Cognome Nome"/></div>
-              <div class="form-group"><label>Data</label><input id="ab-data" type="date"/></div>
-            </div>
             <div class="form-row full">
               <div class="form-group">
                 <label>Tipo abbattimento</label>
@@ -708,13 +705,27 @@
                 </select>
               </div>
             </div>
+            <div class="form-row">
+              <div class="form-group"><label>Data</label><input id="ab-data" type="date" onchange="aggiornaTendinaCacciatore()"/></div>
+              <div class="form-group" id="ab-cacciatore-wrap">
+                <label>Cacciatore</label>
+                <select id="ab-cacciatore" onchange="autoFillDaCacciatore()"><option value="">— seleziona data prima —</option></select>
+              </div>
+              <div class="form-group" id="ab-cacciatore-sel-wrap" style="display:none;">
+                <label>Cacciatore (selezione)</label>
+                <input id="ab-cacciatore-sel" type="text" placeholder="Cognome Nome"/>
+              </div>
+            </div>
             <!-- Posta fissa -->
             <div id="ab-fissa-row" class="form-row">
-              <div class="form-group"><label>Posta n.</label><input id="ab-posta" type="text" placeholder="es. 2033"/></div>
+              <div class="form-group">
+                <label>Posta n.</label>
+                <input id="ab-posta" type="text" placeholder="es. 2033" oninput="autoFillLocalita()"/>
+              </div>
               <div class="form-group"><label>Località</label><input id="ab-localita-fissa" type="text" placeholder="es. PERTEGAR - Damin"/></div>
             </div>
             <!-- Volante -->
-            <div id="ab-volante-row" class="form-row" style="display:none;">
+            <div id="ab-volante-row" class="form-row" style="display:none;grid-template-columns:2fr 1fr 1fr;">
               <div class="form-group"><label>Toponimo</label><input id="ab-toponimo" type="text" placeholder="es. Roccolo - Montecorno"/></div>
               <div class="form-group"><label>Latitudine</label><input id="ab-lat" type="text" placeholder="es. 45.931325"/></div>
               <div class="form-group"><label>Longitudine</label><input id="ab-lon" type="text" placeholder="es. 12.111725"/></div>
@@ -1183,10 +1194,46 @@ function selezionaPostazione(idx, nome){
   rest.style.display='block';
 }
 
+function autoFillLocalita(){
+  const posta = document.getElementById('ab-posta').value.trim();
+  if(!posta) return;
+  // Cerca in tutte le postazioni
+  for(const [nome, posti] of Object.entries(POSTAZIONI_MAP)){
+    const found = posti.find(p => p.p === posta);
+    if(found){
+      document.getElementById('ab-localita-fissa').value = found.l;
+      return;
+    }
+  }
+}
+
+function apriFormBioFromAb(idx){
+  // Vai alla tab biometria e precompila
+  const tabs = document.querySelectorAll('.tab');
+  const bodies = document.querySelectorAll('.tab-body');
+  tabs.forEach(t=>t.classList.remove('active'));
+  bodies.forEach(b=>b.classList.remove('active'));
+  const bioTab = [...tabs].find(t=>t.textContent.includes('Biometria'));
+  const bioBody = document.getElementById('t-biometria');
+  if(bioTab) bioTab.classList.add('active');
+  if(bioBody) bioBody.classList.add('active');
+  // Vai alla sezione Aggiungi
+  const aggBtn = document.querySelector('.nav-item[onclick*="aggiungi"]');
+  if(aggBtn) show('aggiungi', aggBtn);
+  // Precompila i campi
+  autoPopBio(idx);
+  // Popola il select di importazione
+  popolaBioSelect();
+  const sel = document.querySelector('#t-biometria select');
+  if(sel) sel.value = idx;
+}
+
 function salvaAbbattimento(){
-  const cacciatore = document.getElementById('ab-cacciatore').value.trim();
-  const data       = document.getElementById('ab-data').value;
-  const tipo       = document.getElementById('ab-tipo').value;
+  const tipo = document.getElementById('ab-tipo').value;
+  const cacciatore = tipo==='selezione'
+    ? document.getElementById('ab-cacciatore-sel').value.trim()
+    : document.getElementById('ab-cacciatore').value.trim();
+  const data = document.getElementById('ab-data').value;
   const sesso      = document.getElementById('ab-sesso').value;
   const fascetta   = document.getElementById('ab-fascetta').value.trim();
   const fb         = document.getElementById('ab-feedback');
@@ -1225,16 +1272,23 @@ function salvaAbbattimento(){
     salvaFaszetteCloud();
   }
 
-  fb.innerHTML=`<div class="alert alert-ok"><strong>Abbattimento n.${n} salvato.</strong> ${cacciatore} - ${dataFmt} - ${tipoBadge(tipo)} - fascetta <span class="fasc-chip">${fascetta}</span></div>`;
+  fb.innerHTML=`<div class="alert alert-ok"><strong>Abbattimento n.${n} salvato.</strong> ${cacciatore} - ${dataFmt} - ${tipoBadge(tipo)} - fascetta <span class="fasc-chip">${fascetta}</span><br><small>Il form Biometria si aprirà tra un momento...</small></div>`;
   resetAbbattimentoForm();
   renderAbbattimenti();
   renderErad(); renderBlocchi();
   salvaAbbattimentiCloud();
-  setTimeout(()=>fb.innerHTML='', 5000);
+  // Apri automaticamente la scheda biometria precompilata
+  setTimeout(()=>{
+    const newIdx = ABBATTIMENTI.length - 1;
+    apriFormBioFromAb(newIdx);
+    fb.innerHTML='';
+  }, 1500);
 }
 
 function resetAbbattimentoForm(){
-  ['ab-cacciatore','ab-posta','ab-localita-fissa','ab-toponimo','ab-lat','ab-lon','ab-localita-sel','ab-fascetta'].forEach(id=>{
+  const cac = document.getElementById('ab-cacciatore');
+  if(cac) cac.value='';
+  ['ab-posta','ab-localita-fissa','ab-toponimo','ab-lat','ab-lon','ab-localita-sel','ab-fascetta','ab-cacciatore-sel'].forEach(id=>{
     const el=document.getElementById(id); if(el) el.value='';
   });
   document.getElementById('ab-data').value='';
@@ -1249,6 +1303,61 @@ function toggleAbTipo(){
   document.getElementById('ab-fissa-row').style.display    = v==='fissa'     ? 'grid' : 'none';
   document.getElementById('ab-volante-row').style.display  = v==='volante'   ? 'grid' : 'none';
   document.getElementById('ab-selezione-row').style.display= v==='selezione' ? 'grid' : 'none';
+  // Per selezione: testo libero; per fissa/volante: tendina filtrata per data
+  const isSel = v==='selezione';
+  document.getElementById('ab-cacciatore-wrap').style.display     = isSel ? 'none' : '';
+  document.getElementById('ab-cacciatore-sel-wrap').style.display  = isSel ? '' : 'none';
+}
+
+function aggiornaTendinaCacciatore(){
+  const data = document.getElementById('ab-data').value;
+  const sel = document.getElementById('ab-cacciatore');
+  sel.innerHTML = '<option value="">— seleziona —</option>';
+  if(!data) return;
+  const parts = data.split('-');
+  const dataFmt = `${parts[2]}/${parts[1]}/${parts[0]}`;
+  const nomiGiorno = [...new Set(
+    USCITE.filter(u => u[5] === dataFmt).map(u => u[0])
+  )].sort();
+  if(!nomiGiorno.length){
+    sel.innerHTML = '<option value="">Nessuna uscita in questa data</option>';
+    return;
+  }
+  nomiGiorno.forEach(nome => {
+    const o = document.createElement('option');
+    o.value = nome; o.textContent = nome;
+    sel.appendChild(o);
+  });
+}
+
+function autoFillDaCacciatore(){
+  const nome = document.getElementById('ab-cacciatore').value;
+  const data = document.getElementById('ab-data').value;
+  if(!nome || !data) return;
+  const parts = data.split('-');
+  const dataFmt = `${parts[2]}/${parts[1]}/${parts[0]}`;
+
+  // Trova l'uscita di quel cacciatore in quella data
+  const uscita = USCITE.find(u => u[5]===dataFmt && u[0]===nome);
+  if(uscita){
+    // Compila posta e località dall'uscita
+    const posta = uscita[2] || '';
+    const localita = uscita[1] || '';
+    const postaEl = document.getElementById('ab-posta');
+    const locEl = document.getElementById('ab-localita-fissa');
+    if(postaEl) postaEl.value = posta;
+    if(locEl) locEl.value = localita;
+  }
+
+  // Trova fascetta disponibile dell'eradicatore
+  const e = ERADICATORI.find(x => x[1]===nome);
+  if(e){
+    const dispFasc = fascDisp(e[3]);
+    const fascEl = document.getElementById('ab-fascetta');
+    if(fascEl && dispFasc.length){
+      fascEl.value = dispFasc[0].n;
+    }
+  }
 }
 
 function toggleNuovaPostazione(){
@@ -1388,9 +1497,9 @@ function parseData(s){
 function renderAbbattimenti(){
   const tbody = document.getElementById('tbody-abbattimenti');
   if(!tbody) return;
-  // Ordina per data crescente (copia per non alterare l'array originale)
+  // Ordina per data decrescente (più recente prima)
   const ordinati = ABBATTIMENTI.map((r,i)=>({r,i}))
-    .sort((a,b) => parseData(a.r[4]) - parseData(b.r[4]));
+    .sort((a,b) => parseData(b.r[4]) - parseData(a.r[4]));
   tbody.innerHTML = ordinati.map(({r, i:idx}, pos) => {
     const sessoClass = r[5]==='F1'||r[5]==='FA' ? 'b-warn' : r[5]==='M1'||r[5]==='MA' ? 'b-ok' : 'b-info';
     return `<tr id="ab-row-${idx}">
@@ -1648,9 +1757,16 @@ function importaAbbattimenti(){
 function popolaSelect(){
   const s1=document.getElementById('sel-erad-uscita');
   const s2=document.getElementById('sel-dest');
-  ERADICATORI.forEach(e=>{
-    [s1,s2].forEach(sel=>{ const o=document.createElement('option');o.value=e[1];o.textContent=e[1];sel.appendChild(o); });
+  const s3=document.getElementById('ab-cacciatore');
+  const nomi = [...ERADICATORI].sort((a,b)=>a[1].localeCompare(b[1]));
+  nomi.forEach(e=>{
+    [s1,s2].forEach(sel=>{ if(!sel) return; const o=document.createElement('option');o.value=e[1];o.textContent=e[1];sel.appendChild(o); });
   });
+  // Solo abilitati (disciplinare + fascetta) per il form abbattimento
+  if(s3){
+    const abilitati = nomi.filter(e=>statoErad(e)==='ok');
+    abilitati.forEach(e=>{ const o=document.createElement('option');o.value=e[1];o.textContent=e[1];s3.appendChild(o); });
+  }
 }
 
 // ---- Topbar date ----
