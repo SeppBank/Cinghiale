@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -362,10 +361,107 @@
   }
 
   @media (max-width: 768px) {
-    .sidebar { width: 100%; height: auto; position: static; flex-direction: row; flex-wrap: wrap; }
+    .sidebar { display: none; }
     .main { margin-left: 0; }
     .blocchi-grid { grid-template-columns: 1fr; }
     .form-row { grid-template-columns: 1fr; }
+    .topbar { padding: 12px 16px; }
+    .content { padding: 16px; }
+
+    /* Hamburger button */
+    .hamburger-btn {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 5px;
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      padding: 8px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .hamburger-btn span {
+      display: block;
+      width: 100%;
+      height: 2px;
+      background: #fff;
+      border-radius: 1px;
+      transition: all .2s;
+    }
+
+    /* Mobile menu overlay */
+    .mobile-menu {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 200;
+    }
+    .mobile-menu.open { display: block; }
+    .mobile-menu-backdrop {
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.4);
+    }
+    .mobile-menu-panel {
+      position: absolute;
+      top: 0; right: 0; bottom: 0;
+      width: 240px;
+      background: var(--accent);
+      overflow-y: auto;
+      padding: 16px 0;
+    }
+    .mobile-menu-header {
+      padding: 8px 20px 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.15);
+      margin-bottom: 8px;
+    }
+    .mobile-menu-logo { color: rgba(255,255,255,0.6); font-size: 11px; text-transform: uppercase; letter-spacing: .1em; }
+    .mobile-menu-title { color: #fff; font-size: 16px; font-weight: 500; margin-top: 2px; }
+    .mobile-menu-close {
+      position: absolute;
+      top: 12px; right: 12px;
+      background: rgba(255,255,255,0.15);
+      border: none;
+      border-radius: var(--radius);
+      color: #fff;
+      font-size: 18px;
+      width: 32px; height: 32px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .mobile-nav-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: .1em;
+      color: rgba(255,255,255,0.4);
+      padding: 12px 20px 4px;
+    }
+    .mobile-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      padding: 11px 20px;
+      background: none;
+      border: none;
+      color: rgba(255,255,255,0.8);
+      font-size: 14px;
+      font-family: var(--sans);
+      cursor: pointer;
+      text-align: left;
+    }
+    .mobile-nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+    .mobile-nav-item.active { background: rgba(255,255,255,0.15); color: #fff; font-weight: 500; }
+    .mobile-nav-item .ico { font-size: 15px; width: 18px; text-align: center; }
+  }
+
+  @media (min-width: 769px) {
+    .hamburger-btn { display: none; }
+    .mobile-menu { display: none !important; }
   }
 </style>
 </head>
@@ -399,11 +495,38 @@
   </div>
 </aside>
 
+<!-- MOBILE MENU OVERLAY -->
+<div class="mobile-menu" id="mobile-menu">
+  <div class="mobile-menu-backdrop" onclick="chiudiMenu()"></div>
+  <div class="mobile-menu-panel">
+    <button class="mobile-menu-close" onclick="chiudiMenu()">✕</button>
+    <div class="mobile-menu-header">
+      <div class="mobile-menu-logo">Caccia al Cinghiale</div>
+      <div class="mobile-menu-title">Gestionale</div>
+    </div>
+    <div class="mobile-nav-label">Generale</div>
+    <button class="mobile-nav-item active" onclick="showMobile('dashboard',this)"><span class="ico">◈</span> Riepilogo</button>
+    <button class="mobile-nav-item" onclick="showMobile('postazioni',this)"><span class="ico">⌖</span> Postazioni</button>
+    <button class="mobile-nav-item" onclick="showMobile('uscite',this)"><span class="ico">↗</span> Uscite</button>
+    <button class="mobile-nav-item" onclick="showMobile('abbattimenti',this)"><span class="ico">◎</span> Abbattimenti</button>
+    <button class="mobile-nav-item" onclick="showMobile('biometria',this)"><span class="ico">≈</span> Biometria</button>
+    <div class="mobile-nav-label">Eradicatori</div>
+    <button class="mobile-nav-item" onclick="showMobile('eradicatori',this)"><span class="ico">✦</span> Abilitati</button>
+    <button class="mobile-nav-item" onclick="showMobile('magazzino',this)"><span class="ico">⊞</span> Fascette</button>
+    <div class="mobile-nav-label">Operazioni</div>
+    <button class="mobile-nav-item" onclick="showMobile('aggiungi',this)"><span class="ico">+</span> Aggiungi</button>
+    <button class="mobile-nav-item" onclick="showMobile('whatsapp',this)"><span class="ico">✉</span> WhatsApp</button>
+  </div>
+</div>
+
 <!-- MAIN -->
 <main class="main">
   <div class="topbar">
     <span class="page-title" id="page-title">Riepilogo</span>
     <span class="page-subtitle" id="page-date"></span>
+    <button class="hamburger-btn" onclick="apriMenu()" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
   </div>
   <div class="content">
 
@@ -2237,6 +2360,25 @@ function initWADate(){
   const mm = String(today.getMonth()+1).padStart(2,'0');
   const dd = String(today.getDate()).padStart(2,'0');
   el.value = `${yyyy}-${mm}-${dd}`;
+}
+
+// ---- Mobile menu ----
+function apriMenu(){
+  document.getElementById('mobile-menu').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function chiudiMenu(){
+  document.getElementById('mobile-menu').classList.remove('open');
+  document.body.style.overflow = '';
+}
+function showMobile(id, btn){
+  // Aggiorna active nel menu mobile
+  document.querySelectorAll('.mobile-nav-item').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  // Chiama show() normale e sincronizza sidebar desktop
+  const sideBtn = document.querySelector(`.nav-item[onclick*="'${id}'"]`);
+  show(id, sideBtn || btn);
+  chiudiMenu();
 }
 
 // ---- Init ----
