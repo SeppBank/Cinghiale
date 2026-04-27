@@ -1520,18 +1520,25 @@ function salvaUscita(){
   if(!dataVal){ document.getElementById('save-uscita-ok').innerHTML='<div class="alert alert-danger">Inserisci la data dell\'uscita.</div>'; return; }
 
   const dataFmt = dataVal.split('-').reverse().join('/');
-  let localita, posta;
+  let localita, posta, lat='', lon='';
   if(_postazioneSelezionata.tipo==='volante'){
     localita = document.getElementById('in-toponimo-volante').value.trim() || 'volante';
     posta = '';
+    lat = document.getElementById('in-lat-volante').value.trim();
+    lon = document.getElementById('in-lon-volante').value.trim();
+    // Se non inserite manualmente, prendi dalla postazione
+    if(!lat && _postazioneSelezionata.lat) lat = _postazioneSelezionata.lat;
+    if(!lon && _postazioneSelezionata.lon) lon = _postazioneSelezionata.lon;
   } else {
     localita = _postazioneSelezionata.l;
     posta = _postazioneSelezionata.p;
+    lat = _postazioneSelezionata.lat || '';
+    lon = _postazioneSelezionata.lon || '';
   }
   // arma: usa quella della postazione se non specificata
   const armaFinale = arma || _postazioneSelezionata.arma || '';
 
-  USCITE.push([nome, localita, posta, luce, armaFinale, dataFmt, orario]);
+  USCITE.push([nome, localita, posta, luce, armaFinale, dataFmt, orario, lat, lon]);
   renderUscite();
   renderDashUscite();
   salvaSuCloud('uscite', USCITE);
@@ -2135,7 +2142,13 @@ let USCITE = [...USCITE_INIT];
 function renderUscite(){
   const tbody = document.getElementById('tbody-uscite');
   if(!tbody) return;
-  tbody.innerHTML = USCITE.map((r,i)=>{
+  // Ordina per data decrescente (più recente prima)
+  const ordinate = USCITE.map((r,i)=>({r,i})).sort((a,b)=>{
+    const da = a.r[5].split('/').reverse().join('');
+    const db = b.r[5].split('/').reverse().join('');
+    return da<db?1:da>db?-1:0;
+  });
+  tbody.innerHTML = ordinate.map(({r,i})=>{
     const luce = r[3]==='FARO'
       ? `<span class="badge b-warn">FARO</span>`
       : r[3]==='VISORE' ? `<span class="badge b-info">VISORE</span>`
@@ -2316,7 +2329,11 @@ function formattaUscitePerWA(data){
   usciteGiorno.forEach(u=>{
     let riga = `• ${u[0]}`;
     if(u[1]) riga += ` - ${u[1]}`;
-    if(u[2] && u[2]!=='volante') riga += ` (posta ${u[2]})`;
+    if(u[2] && u[2]!=='' && u[2]!=='volante') riga += ` (posta ${u[2]})`;
+    // Aggiungi coordinate se disponibili (volante)
+    if((!u[2] || u[2]==='volante' || u[2]==='') && u[7] && u[8]){
+      riga += ` - coord: ${u[7]}, ${u[8]}`;
+    }
     riga += ` - orario: ${u[6]}`;
     msg += riga + '\n';
   });
