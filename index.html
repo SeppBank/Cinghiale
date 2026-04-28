@@ -589,7 +589,7 @@
       </div>
       <div class="card">
         <div class="table-wrap">
-          <table id="tab-uscite"><thead><tr><th>Controllore</th><th>Località</th><th>Posta</th><th>Luce</th><th>Arma</th><th style="cursor:pointer" onclick="sortUscite()" title="Ordina">Data ↕</th><th>Orario</th><th></th></tr></thead><tbody id="tbody-uscite">
+          <table id="tab-uscite"><thead><tr><th>Controllore</th><th>Località</th><th>Posta</th><th>Luce</th><th style="cursor:pointer" onclick="sortUscite()" title="Ordina">Data ↕</th><th>Orario</th><th>Lat</th><th>Lon</th><th></th></tr></thead><tbody id="tbody-uscite">
             </tbody></table>
         </div>
       </div>
@@ -1535,10 +1535,9 @@ function salvaUscita(){
     lat = _postazioneSelezionata.lat || '';
     lon = _postazioneSelezionata.lon || '';
   }
-  // arma: usa quella della postazione se non specificata
-  const armaFinale = arma || _postazioneSelezionata.arma || '';
+  // arma: non più salvata
 
-  USCITE.push([nome, localita, posta, luce, armaFinale, dataFmt, orario, lat, lon]);
+  USCITE.push([nome, localita, posta, luce, '', dataFmt, orario, lat, lon]);
   renderUscite();
   renderDashUscite();
   salvaSuCloud('uscite', USCITE);
@@ -2153,13 +2152,25 @@ function renderUscite(){
       ? `<span class="badge b-warn">FARO</span>`
       : r[3]==='VISORE' ? `<span class="badge b-info">VISORE</span>`
       : `<span class="badge b-gray">${r[3]||'-'}</span>`;
+    // Recupera lat/lon: prima dall'uscita stessa (indici 7,8), poi da POSTAZIONI_MAP
+    let lat = r[7]||'', lon = r[8]||'';
+    if((!lat||!lon) && r[2] && r[2]!=='volante'){
+      // Cerca nelle postazioni per numero posta
+      for(const posti of Object.values(POSTAZIONI_MAP)){
+        const found = posti.find(p=>p.p===r[2]);
+        if(found){ lat=lat||found.lat||''; lon=lon||found.lon||''; break; }
+      }
+    }
+    const latCell = lat ? `<span style="font-family:var(--mono);font-size:11px">${lat}</span>` : '<span style="color:var(--text-faint)">—</span>';
+    const lonCell = lon ? `<span style="font-family:var(--mono);font-size:11px">${lon}</span>` : '<span style="color:var(--text-faint)">—</span>';
     return `<tr>
       <td>${r[0]}</td><td>${r[1]}</td>
       <td style="font-family:var(--mono);font-size:11px">${r[2]||'volante'}</td>
       <td>${luce}</td>
-      <td style="font-size:12px">${r[4]}</td>
       <td style="font-family:var(--mono);font-size:11px">${r[5]}</td>
       <td style="font-family:var(--mono);font-size:11px">${r[6]}</td>
+      <td>${latCell}</td>
+      <td>${lonCell}</td>
       <td style="white-space:nowrap;">
         <button onclick="eliminaUscita(${i})" title="Elimina" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:14px;padding:2px 4px;">✕</button>
       </td>
