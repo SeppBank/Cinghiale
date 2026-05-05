@@ -634,9 +634,11 @@
       <div class="search-wrap">
         <input class="search-input" type="text" placeholder="Cerca eradicatore..." oninput="filtroErad(this.value)"/>
         <select onchange="filtroEradStato(this.value)" style="padding:8px 12px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);font-size:13px;color:var(--text);">
-          <option value="">Tutti</option>
+          <option value="">Tutti (attivi)</option>
           <option value="ok">Abilitati</option>
+          <option value="nofasc">Senza fascetta</option>
           <option value="blocco">Bloccati</option>
+          <option value="ritirato">Ritirati</option>
           <option value="nofasc">Senza fascetta</option>
         </select>
       </div>
@@ -1022,6 +1024,7 @@ let _eradQ = '', _eradS = '';
 // ---- Utility ----
 function fascDisp(fasc){ return fasc.filter(f=>!f.u); }
 function statoErad(e){
+  if(e[4]==='ritirato') return 'ritirato';
   const hD = !!e[2], hF = fascDisp(e[3]).length > 0;
   if (hD && hF) return 'ok';
   if (!hD) return 'blocco';
@@ -1065,6 +1068,7 @@ function renderErad(){
   let ab=0,bl=0,sf=0;
   ERADICATORI.forEach(e=>{
     const s=statoErad(e);
+    if(s==='ritirato') return; // non contare i ritirati
     if(s==='ok') ab++; else if(s==='blocco') bl++; else sf++;
   });
   document.getElementById('m-abilitati').textContent=ab;
@@ -1078,10 +1082,12 @@ function renderErad(){
     const s=statoErad(e);
     const disp=fascDisp(fasc);
     if(_eradQ && !nome.toLowerCase().includes(_eradQ)) return;
+    if(_eradS && _eradS!=='ritirato' && s==='ritirato') return; // nascondi ritirati salvo filtro esplicito
     if(_eradS && s!==_eradS) return;
 
     let badge;
-    if(s==='ok') badge='<span class="badge b-ok">Abilitato</span>';
+    if(s==='ritirato') badge='<span class="badge b-gray">Ritirato</span>';
+    else if(s==='ok') badge='<span class="badge b-ok">Abilitato</span>';
     else if(s==='nofasc') badge='<span class="badge b-warn">Senza fascetta</span>';
     else {
       const mm=[];
@@ -1100,13 +1106,38 @@ function renderErad(){
     const discCell = disc
       ? `<span class="disc-edit" onclick="editDisc(this,'${nome}')" title="Clicca per modificare" style="cursor:pointer;border-bottom:1px dashed var(--border-strong);font-size:12px;">${disc}</span>`
       : `<span class="disc-edit" onclick="editDisc(this,'${nome}')" title="Clicca per inserire" style="cursor:pointer;color:var(--danger);font-size:12px;">non firmato - clicca per inserire</span>`;
+
+    // Pulsante ritiro / riattiva
+    const ritiraBtn = s==='ritirato'
+      ? `<button onclick="riattiva(${eidx})" title="Riattiva" style="background:none;border:1px solid var(--accent);border-radius:4px;cursor:pointer;color:var(--accent);font-size:11px;padding:2px 6px;margin-left:6px;">Riattiva</button>`
+      : `<button onclick="ritira(${eidx})" title="Segna come ritirato" style="background:none;border:1px solid var(--text-faint);border-radius:4px;cursor:pointer;color:var(--text-muted);font-size:11px;padding:2px 6px;margin-left:6px;">Ritira</button>`;
+
+    const rowStyle = s==='ritirato' ? ' style="opacity:0.45;"' : '';
     const tr=document.createElement('tr');
-    tr.innerHTML=`<td style="font-family:var(--mono);font-size:12px;cursor:pointer;border-bottom:1px dashed var(--border-strong);" onclick="editId(this,${ERADICATORI.indexOf(e)})" title="Clicca per modificare">${id||'-'}</td><td>${nome}</td><td>${discCell}</td><td style="text-align:center">${fasc.length}</td><td>${fascChips}</td><td>${badge}</td>`;
+    tr.setAttribute('style', s==='ritirato' ? 'opacity:0.45;' : '');
+    tr.innerHTML=`<td style="font-family:var(--mono);font-size:12px;cursor:pointer;border-bottom:1px dashed var(--border-strong);" onclick="editId(this,${eidx})" title="Clicca per modificare">${id||'-'}</td><td>${nome}</td><td>${discCell}</td><td style="text-align:center">${fasc.length}</td><td>${fascChips}</td><td>${badge}${ritiraBtn}</td>`;
     tbody.appendChild(tr);
   });
 }
 function filtroErad(q){_eradQ=q.toLowerCase();renderErad();}
 function filtroEradStato(v){_eradS=v;renderErad();}
+
+function ritira(eidx){
+  const e=ERADICATORI[eidx];
+  if(!e) return;
+  if(!confirm(`Segnare ${e[1]} come ritirato? Sparirà dalle tendine operative ma resterà nello storico.`)) return;
+  e[4]='ritirato';
+  renderErad(); renderBlocchi();
+  salvaFaszetteCloud();
+}
+function riattiva(eidx){
+  const e=ERADICATORI[eidx];
+  if(!e) return;
+  if(!confirm(`Riattivare ${e[1]}?`)) return;
+  e[4]=null;
+  renderErad(); renderBlocchi();
+  salvaFaszetteCloud();
+}
 
 function marcaUsata(eidx, fidx){
   const e = ERADICATORI[eidx];
@@ -1632,7 +1663,7 @@ function renderAbbattimenti(){
   tbody.innerHTML = ordinati.map(({r, i:idx}, pos) => {
     const sessoClass = r[5]==='F1'||r[5]==='FA' ? 'b-warn' : r[5]==='M1'||r[5]==='MA' ? 'b-ok' : 'b-info';
     return `<tr id="ab-row-${idx}">
-      <td style="font-family:var(--mono);font-size:11px;color:var(--text-faint)">${pos+1}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:var(--text-faint)">${r[0]}</td>
       <td>${r[1]}</td>
       <td>${r[2]}</td>
       <td style="font-family:var(--mono);font-size:11px">${r[3]||'-'}</td>
