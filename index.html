@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -1659,7 +1660,7 @@ function renderAbbattimenti(){
   if(!tbody) return;
   // Ordina per data decrescente (più recente prima)
   const ordinati = ABBATTIMENTI.map((r,i)=>({r,i}))
-    .sort((a,b) => parseData(b.r[4]) - parseData(a.r[4]));
+    .sort((a,b) => parseData(b.r[4]) - parseData(a.r[4]) || b.r[0] - a.r[0]);
   tbody.innerHTML = ordinati.map(({r, i:idx}, pos) => {
     const sessoClass = r[5]==='F1'||r[5]==='FA' ? 'b-warn' : r[5]==='M1'||r[5]==='MA' ? 'b-ok' : 'b-info';
     return `<tr id="ab-row-${idx}">
