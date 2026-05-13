@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -976,7 +974,7 @@ const ERADICATORI = [
   [5,"Dall'Antonia Mauro",'28/04/2025',[]],
   [6,"Dall'Arche Samuele",'19/09/2025',[{n:1963,c:'19/09/2025',u:null}]],
   [7,'Dalle Molle Valter','11/10/2025',[{n:1969,c:'11/10/2025',u:null}]],
-  [8,'Damuzzo Davide','26/05/2025',[{n:743,c:'26/05/2025',u:'29/11/2025'},{n:1971,c:'03/12/2025',u:'21/12/2025'},{n:1979,c:'03/01/2026',u:'27/01/2026'},{n:1981,c:'18/07/2025',u:null}]],
+  [8,'Damuzzo Davide','26/05/2025',[{n:743,c:'26/05/2025',u:'29/11/2025'},{n:1971,c:'03/12/2025',u:'21/12/2025'},{n:1979,c:'03/01/2026',u:'27/01/2026'},{n:1981,c:'03/01/2026',u:'17/03/2026'}]],
   [9,'Davanzo Paolo','28/04/2025',[{n:771,c:'30/05/2025',u:null}]],
   [10,'De Biasi Beniamino','28/04/2025',[]],
   [11,'De Biasi Franco','28/04/2025',[{n:1489,c:'08/08/2025',u:'21/12/2025'},{n:1972,c:'22/12/2025',u:null}]],
@@ -984,7 +982,7 @@ const ERADICATORI = [
   [50,'Facci Federico','28/04/2025',[{n:750,c:'29/08/2025',u:'29/05/2025'},{n:1978,c:'03/01/2026',u:null}]],
   [13,'Facci Michele','28/04/2025',[{n:749,c:'28/04/2026',u:null},{n:1488,c:'17/09/2025',u:'31/12/2025'}]],
   [14,'Favalessa Massimiliano','28/04/2025',[{n:747,c:'28/04/2025',u:'01/08/2025'},{n:1490,c:'02/08/2025',u:'21/08/2025'},{n:1493,c:'22/08/2025',u:null}]],
-  [null,'FIABANE GIULIA','06/10/2025',[{n:768,c:'08/06/2025',u:'17/03/2026'},{n:774,c:'03/01/2026',u:null}]],
+  [null,'FIABANE GIULIA','06/10/2025',[{n:768,c:'08/06/2025',u:'17/03/2026'},{n:774,c:'18/07/2025',u:null}]],
   [40,'Forelli Mario',null,[]],
   [15,'Graiff Roberto','28/04/2025',[]],
   [16,'Gugel Andreino','28/04/2025',[{n:1495,c:'28/04/2025',u:null}]],
@@ -1661,7 +1659,7 @@ function renderAbbattimenti(){
   if(!tbody) return;
   // Ordina per data decrescente (più recente prima)
   const ordinati = ABBATTIMENTI.map((r,i)=>({r,i}))
-    .sort((a,b) => parseData(b.r[4]) - parseData(a.r[4]) || b.r[0] - a.r[0]);
+    .sort((a,b) => parseData(b.r[4]) - parseData(a.r[4]));
   tbody.innerHTML = ordinati.map(({r, i:idx}, pos) => {
     const sessoClass = r[5]==='F1'||r[5]==='FA' ? 'b-warn' : r[5]==='M1'||r[5]==='MA' ? 'b-ok' : 'b-info';
     return `<tr id="ab-row-${idx}">
