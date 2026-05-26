@@ -1759,79 +1759,7 @@ let ABBATTIMENTI = [
   [8,'Pederiva Domenico','Versante nord','','31/01/2026','FA','volante','1986'],
 ];
 
-const USCITE_INIT = [
-  ['Pederiva Domenico','PERTEGAR - Damin','2033','VISORE','semiauto Benelli  cal. 30.06','02/01/2026','17:00-19:00'],
-  ['Pederiva Domenico','PERTEGAR - Damin','2033','VISORE','semiauto Benelli  cal. 30.06','09/01/2026','17:00-19:00'],
-  ['Bottarel Federico','volante - Roccolo','','VISORE','45.92086, \'12.07860','11/01/2026','17:00-19:00'],
-  ['Pederiva Domenico','PERTEGAR - Damin','2033','VISORE','semiauto Benelli  cal. 30.06','11/01/2026','17:00-19:00'],
-  ['Zavarise Giulio','CAMPEA - Casette','2022','VISORE','bolt action Weatherby .270 Weath','11/01/2026','17:00-23:00'],
-  ['Pederiva Domenico','PERTEGAR - Damin','2033','VISORE','semiauto Benelli  cal. 30.06','13/01/2026','17:00-19:00'],
-  ['Facci Michele','MONCADER','2026b','VISORE','bolt action  .300 WSM','14/01/2026','18:00-23:00'],
-  ['Pederiva Domenico','Campea - Casette','2022','VISORE','semiauto Benelli  cal. 30.06','14/01/2026','17:00-22:00'],
-  ['Facci Michele','MONCADER','2026b','VISORE','bolt action  .300 WSM','15/01/2026','18:00-23:00'],
-  ['Pederiva Domenico','Campea - Casette','2022','VISORE','semiauto Benelli  cal. 30.06','15/01/2026','17:00-22:00'],
-  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','15/01/2026','17:30-23:00'],
-  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','15/01/2026','17:30-23:00'],
-  ['Facci Michele','MONCADER','2026b','VISORE','bolt action  .300 WSM','16/01/2026','18:00-23:00'],
-  ['Pederiva Domenico','Campea /Casette','2022','VISORE','semiauto Benelli  cal. 30.06','16/01/2026','17:00-22:00'],
-  ['Pollazzon Anselmo','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','16/01/2026','17:30-23:00'],
-  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','16/01/2026','17:30-23:00'],
-  ['Dal Vecchio Renato','volante - Pardolin','','VISORE','45.930428N, \'12.066007E','17/01/2026','17:00-02:00'],
-  ['Santin Daniele','TENADA - Feltre','2051','FARO','bolt action  .300 WSM','17/01/2026','18:00-22:00'],
-  ['Vendrame Salvino','COMBAI - Colmellere','2036','VISORE','bolt action  cal. 30.06','17/01/2026','16:00-24:00'],
-  ['Zamai Fiore','Pian minor','2007','VISORE','bolt action  Tikka .300 WM','17/01/2026','18:00-24:00'],
-  ['Pederiva Domenico','CAMPEA - Casette','2022','VISORE','semiauto Benelli  cal. 30.06','20/01/2026','17:00-22:00'],
-  ['Pederiva Domenico','CAMPEA - Casette','2022','VISORE','semiauto Benelli  cal. 30.06','21/01/2026','17:00-22:00'],
-  ['Pollazzon Mauro','CARMINE - Cadorin','2013','VISORE','bolt action  Sabatti  .308W','23/01/2026','17:30-23:00'],
-  ['Gugel Andreino','CASELLA - Farandin','2001b','VISORE','bolt action  Sako .300 W','24/01/2026','18:00-21:00'],
-  ['Santin Daniele','volante - PIANEZZE Mandre','volante','FARO','45°57\'51"N, 12°06\'19"E','24/01/2026','18:00-21:00'],
-  ['VILLANOVA NICOLA','volante Roccolo','volante','VISORE','45.919704, \'12.092692','24/01/2026','17:30-21:00'],
-  ['Bottarel Federico','volante - Roccolo','','VISORE','45.92086, 12.07860','25/01/2026','17:30-24:00'],
-  ['Gugel Andreino','CASELLA - Farandin','2001b','VISORE','bolt action  Sako .300 W','25/01/2026','18:00-21:00'],
-  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','25/01/2026','17:30-24:00'],
-  ['VILLANOVA NICOLA','volante Roccolo','volante','VISORE','45.919704, \'12.092692','25/01/2026','17:30-21:00'],
-  ['Bottarel Federico','volante - Cecchella','','VISORE','45.92220, \'12,07808','28/01/2026','18:00-01:00'],
-  ['Bottarel Federico','volante - Cecchella','','VISORE','45.92927, \'12,09619','31/01/2026','18:30-01:00'],
-  ['Pederiva Domenico','PERTEGAR - Damin','2033','VISORE','semiauto Benelli  cal. 30.06','31/01/2026','17:00-19:00'],
-  ['Vendrame Salvino','CAMPEA - Colpiere','2048','VISORE','bolt action  cal. 30.06','01/02/2026','18:00-23:00'],
-  ['Bottarel Federico','volante - Serra','','VISORE','45.92637  \'12.08665','04/02/2026','17:30-01:00'],
-  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','06/02/2026','17:30-23:00'],
-  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','06/02/2026','17:30-23:00'],
-  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','07/02/2026','17:30-23:00'],
-  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','07/02/2026','17:30-23:00'],
-  ['Vendrame Salvino','CAMPEA - Colpiere','2048','VISORE','bolt action  cal. 30.06','08/02/2026','18:00-23:00'],
-  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','13/02/2026','18:00-23:00'],
-  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','13/02/2026','18:00-23:00'],
-  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','14/02/2026','18:00-22:30'],
-  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','14/02/2026','18:00-22:30'],
-  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','15/02/2026','18:00-22:30'],
-  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','15/02/2026','18:00-22:30'],
-  ['Bottarel Federico','volante - Serra','','VISORE','45.92102, 12.07818','16/02/2026','17:00-01:00'],
-  ['Bottarel Federico','volante - Serra','','VISORE','45.92102, 12.07818','18/02/2026','17:00-01:00'],
-  ['Pederiva Domenico','PERTEGAR - Damin','2033','VISORE','semiauto Benelli  cal. 30.06','18/02/2026','18:00-23:00'],
-  ['Bottarel Federico','volante - Serra','','VISORE','45.92656, 12.08429','21/02/2026','18:00-01:00'],
-  ['Vendrame Salvino','CAMPEA - la bassa','2025','VISORE','bolt action  cal. 30.06','24/02/2026','17:00-23:30'],
-  ['Pederiva Domenico','PERTEGAR - Damin','2033','VISORE','semiauto Benelli  cal. 30.06','26/02/2026','17:00-23:00'],
-  ['Vendrame Salvino','CAMPEA - la bassa','2025','VISORE','bolt action  cal. 30.06','26/02/2026','17:00-23:30'],
-  ['Vendrame Salvino','CAMPEA - Colpiere','2048','VISORE','bolt action  cal. 30.06','01/03/2026','18:00-23:30'],
-  ['Lodi Luigi','MILIANA ovest','2015b','VISORE','semiauto Benelli 30.06','04/03/2026','18:00-21:00'],
-  ['Vendrame Salvino','CAMPEA - Colpiere','2048','VISORE','bolt action  cal. 30.06','04/03/2026','18:00-24:00'],
-  ['Pederiva Domenico','CAMPEA - Casette','2022','VISORE','semiauto Benelli  cal. 30.06','05/03/2026','18:00-22:00'],
-  ['Vendrame Salvino','CAMPEA - la bassa','2025','VISORE','bolt action  cal. 30.06','06/03/2026','18:00-24:00'],
-  ['Pederiva Domenico','CAMPEA - Casette','2022','VISORE','semiauto Benelli  cal. 30.06','09/03/2026','18:00-22:00'],
-  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','13/03/2026','18:00-23:30'],
-  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','13/03/2026','18:30-22:00'],
-  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','13/03/2026','18:00-23:30'],
-  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','13/03/2026','18:30-22:00'],
-  ['Bottarel Federico','volante - Serra','','VISORE','45.926502, 12.08360','14/03/2026','18:00-24:00'],
-  ['BERNARDI JOHNNY JUNIOR','COL ZANIN - Gregoletto','2054','FARO','bolt action 7 RM','16/03/2026','18:30-23:00'],
-  ['Damuzzo Davide','COMBAI – Acqua salsa','2030','FARO','kipplauf C.Z. 7x65   30.06','18/03/2026','19:00-23:00'],
-  ['Damuzzo Davide','COMBAI – Acqua salsa','2030','FARO','kipplauf C.Z. 7x65   30.06','20/03/2026','18:00-21:30'],
-  ['BERNARDI JOHNNY JUNIOR','COL ZANIN - Gregoletto','2054','FARO','bolt action 7 RM','23/03/2026','18:30-23:00'],
-  ['Pollazzon Anselmo','MILIANA est','2023','VISORE','bolt action  Remington  7 RM','23/03/2026','18:30-24:00'],
-  ['Pollazzon Mauro','MILIANA - Miotto','2005b','VISORE','bolt action  Sabatti  .308W','23/03/2026','18:30-24:00'],
-  ['Zamai Fiore','CAMPEA - Castel','2043','VISORE','bolt action  Weatherby .300 Weath','29/03/2026','20:00-01:00']
-];
+const USCITE_INIT = []; // dati caricati da Google Sheets
 
 
 function tipoLabel(t){
@@ -2000,6 +1928,13 @@ async function caricaDaCloud(){
 }
 
 async function salvaSuCloud(tabella, dati){
+  // Protezione: non sovrascrivere mai il cloud con array vuoti
+  // per tabelle che devono contenere dati
+  const tabelleProtette = ['uscite','abbattimenti','biometria','destinatari'];
+  if(tabelleProtette.includes(tabella) && (!dati || dati.length===0)){
+    console.warn(`salvaSuCloud: blocco salvataggio di '${tabella}' vuoto`);
+    return;
+  }
   mostraSync('Salvataggio...', 'info');
   try {
     await fetch(GS_URL, {
@@ -2167,7 +2102,7 @@ function sortUscite(){
 renderDashUscite();
 }
 
-let USCITE = [...USCITE_INIT];
+let USCITE = []; // popolato da Google Sheets
 
 function renderUscite(){
   const tbody = document.getElementById('tbody-uscite');
