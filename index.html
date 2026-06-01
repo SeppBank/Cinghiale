@@ -570,7 +570,93 @@
       </div>
       <div class="card">
         <div class="table-wrap">
-          <table id="tab-post"><thead><tr><th>Cacciatore</th><th>Località</th><th>Posta</th><th>Luce</th><th>Arma</th><th style="cursor:pointer" onclick="sortPostazioni('lat')" title="Ordina per lat">Lat ↕</th><th>Lon</th></tr></thead><tbody id="tbody-postazioni"></tbody></table>
+          <table id="tab-post"><thead><tr><th>Cacciatore</th><th>Località</th><th>Posta</th><th>Luce</th><th>Arma</th><th style="cursor:pointer" onclick="sortPostazioni('lat')" title="Ordina per lat">Lat ↕</th><th>Lon</th><th></th></tr></thead><tbody id="tbody-postazioni"></tbody></table>
+        </div>
+      </div>
+
+      <!-- Form nuova postazione -->
+      <div class="card" style="margin-top:16px;">
+        <div class="card-head"><h3>Aggiungi / Sposta postazione</h3></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Cacciatore</label>
+              <select id="np-cacciatore">
+                <option value="">— seleziona —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Località</label>
+              <input type="text" id="np-localita" placeholder="es. CAMPEA - Casette"/>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Posta n.</label>
+              <input type="text" id="np-posta" placeholder="es. 2033 (vuoto se volante)"/>
+            </div>
+            <div class="form-group">
+              <label>Luce</label>
+              <select id="np-luce">
+                <option>FARO</option>
+                <option>VISORE</option>
+                <option>V.TERMICO</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row" style="grid-template-columns:2fr 1fr 1fr;">
+            <div class="form-group">
+              <label>Arma</label>
+              <input type="text" id="np-arma" placeholder="es. bolt action .308 W"/>
+            </div>
+            <div class="form-group">
+              <label>Latitudine</label>
+              <input type="text" id="np-lat" placeholder="es. 45.931325"/>
+            </div>
+            <div class="form-group">
+              <label>Longitudine</label>
+              <input type="text" id="np-lon" placeholder="es. 12.111725"/>
+            </div>
+          </div>
+          <div id="np-feedback" style="margin-bottom:8px;"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" onclick="aggiungiPostazione()">Aggiungi postazione</button>
+            <button class="btn btn-secondary" onclick="resetFormPostazione()">Pulisci</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Form sposta postazione -->
+      <div class="card" style="margin-top:16px;">
+        <div class="card-head"><h3>Sposta postazione esistente</h3></div>
+        <div class="card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Da cacciatore</label>
+              <select id="sp-da" onchange="aggiornaSpostaPostazioni()">
+                <option value="">— seleziona —</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Postazione da spostare</label>
+              <select id="sp-posta">
+                <option value="">— seleziona cacciatore prima —</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>A cacciatore</label>
+              <select id="sp-a">
+                <option value="">— seleziona —</option>
+              </select>
+            </div>
+          </div>
+          <div id="sp-feedback" style="margin-bottom:8px;"></div>
+          <div style="display:flex;gap:8px;">
+            <button class="btn btn-primary" onclick="spostaPostazione()">Sposta</button>
+            <button class="btn btn-secondary" onclick="copiaPostazione()">Copia (uso condiviso)</button>
+          </div>
         </div>
       </div>
     </div>
@@ -2001,6 +2087,7 @@ function renderPostazioniTable(){
       <td style="font-family:var(--mono);font-size:11px;${lonStyle}cursor:pointer;border-bottom:1px dashed var(--border-strong);"
           onclick="editCoord(this,'${nomeSafe}',${pi},'lon')"
           title="Clicca per modificare">${p.lon||'— inserire'}</td>
+      <td><button onclick="eliminaPostazione('${nomeSafe}',${pi})" title="Elimina" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:14px;padding:2px 4px;">✕</button></td>
     </tr>`);
   });
   tbody.innerHTML = rows.join('');
@@ -2024,6 +2111,103 @@ function salvaCoord(input, nome, pi, field){
   const val = input.value.trim();
   const entry = (POSTAZIONI_MAP[nome]||[])[pi];
   if(entry){ entry[field] = val; }
+  renderPostazioniTable();
+}
+
+// ---- Gestione postazioni: aggiungi, elimina, sposta ----
+function popolaSelectPostazioni(){
+  const nomi = Object.keys(POSTAZIONI_MAP).sort();
+  ['np-cacciatore','sp-da','sp-a'].forEach(id=>{
+    const sel = document.getElementById(id);
+    if(!sel) return;
+    const cur = sel.value;
+    sel.innerHTML = '<option value="">— seleziona —</option>';
+    nomi.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; sel.appendChild(o); });
+    if(cur) sel.value = cur;
+  });
+}
+
+function aggiornaSpostaPostazioni(){
+  const da = document.getElementById('sp-da').value;
+  const sel = document.getElementById('sp-posta');
+  sel.innerHTML = '<option value="">— seleziona postazione —</option>';
+  if(!da || !POSTAZIONI_MAP[da]) return;
+  POSTAZIONI_MAP[da].forEach((p,i)=>{
+    const o = document.createElement('option');
+    o.value = i;
+    o.textContent = `${p.l} (posta ${p.p||'volante'})`;
+    sel.appendChild(o);
+  });
+}
+
+function aggiungiPostazione(){
+  const nome = document.getElementById('np-cacciatore').value;
+  const localita = document.getElementById('np-localita').value.trim();
+  const posta = document.getElementById('np-posta').value.trim();
+  const luce = document.getElementById('np-luce').value;
+  const arma = document.getElementById('np-arma').value.trim();
+  const lat = document.getElementById('np-lat').value.trim();
+  const lon = document.getElementById('np-lon').value.trim();
+  const fb = document.getElementById('np-feedback');
+  if(!nome){ fb.innerHTML='<div class="alert alert-danger">Seleziona un cacciatore.</div>'; return; }
+  if(!localita){ fb.innerHTML='<div class="alert alert-danger">Inserisci la località.</div>'; return; }
+  if(!POSTAZIONI_MAP[nome]) POSTAZIONI_MAP[nome]=[];
+  POSTAZIONI_MAP[nome].push({l:localita, p:posta, luce, arma, lat, lon, v:!posta});
+  fb.innerHTML=`<div class="alert alert-ok">Postazione aggiunta a <strong>${nome}</strong>.</div>`;
+  setTimeout(()=>fb.innerHTML='',3000);
+  resetFormPostazione();
+  renderPostazioniTable();
+}
+
+function resetFormPostazione(){
+  ['np-localita','np-posta','np-arma','np-lat','np-lon'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
+  document.getElementById('np-cacciatore').value='';
+}
+
+function eliminaPostazione(nome, pi){
+  const p = (POSTAZIONI_MAP[nome]||[])[pi];
+  if(!p) return;
+  if(!confirm(`Eliminare la postazione "${p.l}" (posta ${p.p||'volante'}) di ${nome}?`)) return;
+  POSTAZIONI_MAP[nome].splice(pi,1);
+  renderPostazioniTable();
+}
+
+function spostaPostazione(){
+  const da = document.getElementById('sp-da').value;
+  const pi = document.getElementById('sp-posta').value;
+  const a = document.getElementById('sp-a').value;
+  const fb = document.getElementById('sp-feedback');
+  if(!da||pi===''||!a){ fb.innerHTML='<div class="alert alert-danger">Compila tutti i campi.</div>'; return; }
+  if(da===a){ fb.innerHTML='<div class="alert alert-danger">Cacciatore di origine e destinazione sono uguali.</div>'; return; }
+  const posta = POSTAZIONI_MAP[da][parseInt(pi)];
+  if(!posta) return;
+  if(!POSTAZIONI_MAP[a]) POSTAZIONI_MAP[a]=[];
+  POSTAZIONI_MAP[a].push({...posta});
+  POSTAZIONI_MAP[da].splice(parseInt(pi),1);
+  fb.innerHTML=`<div class="alert alert-ok">Postazione spostata da <strong>${da}</strong> a <strong>${a}</strong>.</div>`;
+  setTimeout(()=>fb.innerHTML='',3000);
+  document.getElementById('sp-da').value='';
+  document.getElementById('sp-posta').innerHTML='<option value="">— seleziona cacciatore prima —</option>';
+  document.getElementById('sp-a').value='';
+  renderPostazioniTable();
+}
+
+function copiaPostazione(){
+  const da = document.getElementById('sp-da').value;
+  const pi = document.getElementById('sp-posta').value;
+  const a = document.getElementById('sp-a').value;
+  const fb = document.getElementById('sp-feedback');
+  if(!da||pi===''||!a){ fb.innerHTML='<div class="alert alert-danger">Compila tutti i campi.</div>'; return; }
+  if(da===a){ fb.innerHTML='<div class="alert alert-danger">Cacciatore di origine e destinazione sono uguali.</div>'; return; }
+  const posta = POSTAZIONI_MAP[da][parseInt(pi)];
+  if(!posta) return;
+  if(!POSTAZIONI_MAP[a]) POSTAZIONI_MAP[a]=[];
+  POSTAZIONI_MAP[a].push({...posta});
+  fb.innerHTML=`<div class="alert alert-ok">Postazione copiata da <strong>${da}</strong> a <strong>${a}</strong> (uso condiviso).</div>`;
+  setTimeout(()=>fb.innerHTML='',3000);
+  document.getElementById('sp-a').value='';
   renderPostazioniTable();
 }
 
@@ -2380,6 +2564,7 @@ setDate();
 popolaSelect();
 caricaDaCloud();
 renderPostazioniTable();
+popolaSelectPostazioni();
 renderUscite();
 renderDashUscite();
 renderDestinatari();
