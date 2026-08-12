@@ -856,13 +856,13 @@
                 <p style="font-size:13px;font-weight:500;margin-bottom:12px;">Nuova postazione per <span id="lbl-erad-posta" style="color:var(--accent);"></span></p>
                 <div class="form-row">
                   <div class="form-group"><label>Numero posta</label><input type="text" id="np-numero" placeholder="es. 2058"/></div>
-                  <div class="form-group"><label>Località</label><input type="text" id="np-localita" placeholder="es. CAMPEA - Nuova"/></div>
+                  <div class="form-group"><label>Località</label><input type="text" id="np-localita-uscita" placeholder="es. CAMPEA - Nuova"/></div>
                 </div>
                 <div style="display:flex;gap:8px;">
-                  <button class="btn btn-primary" onclick="aggiungiPostazione()">Aggiungi</button>
+                  <button class="btn btn-primary" onclick="aggiungiPostazioneUscita()">Aggiungi</button>
                   <button class="btn btn-secondary" onclick="toggleNuovaPostazione()">Annulla</button>
                 </div>
-                <div id="np-feedback" style="margin-top:8px;"></div>
+                <div id="np-feedback-uscita" style="margin-top:8px;"></div>
               </div>
 
               <div id="postazione-selezionata" style="display:none;">
@@ -947,7 +947,7 @@
             </div>
             <div class="form-row">
               <div class="form-group"><label>Sesso</label>
-                <select id="ab-sesso"><option value="FA">FA — femmina adulta</option><option value="F1">F1 — femmina giovane</option><option value="MA">MA — maschio adulto</option><option value="M1">M1 — maschio giovane</option></select>
+                <select id="ab-sesso"><option value="FA">FA — femmina adulta</option><option value="F1">F1 — femmina giovane</option><option value="F0">F0 — piccola femmina</option><option value="MA">MA — maschio adulto</option><option value="M1">M1 — maschio giovane</option><option value="M0">M0 — piccolo maschio</option></select>
               </div>
               <div class="form-group"><label>N. fascetta</label><input id="ab-fascetta" type="text" placeholder="es. 1975"/></div>
             </div>
@@ -977,7 +977,7 @@
             </div>
             <div class="form-row">
               <div class="form-group"><label>Data</label><input type="date" id="bio-data"/></div>
-              <div class="form-group"><label>Sesso</label><select id="bio-sesso"><option>FA</option><option>F1</option><option>MA</option><option>M1</option></select></div>
+              <div class="form-group"><label>Sesso</label><select id="bio-sesso"><option>FA</option><option>F1</option><option>F0</option><option>MA</option><option>M1</option><option>M0</option></select></div>
             </div>
             <div class="form-row">
               <div class="form-group"><label>LTT (cm)</label><input type="number" id="bio-ltt"/></div>
@@ -1605,22 +1605,23 @@ function toggleNuovaPostazione(){
   f.style.display = f.style.display==='none' ? 'block' : 'none';
   if(f.style.display==='block'){
     document.getElementById('np-numero').value='';
-    document.getElementById('np-localita').value='';
-    document.getElementById('np-feedback').innerHTML='';
+    document.getElementById('np-localita-uscita').value='';
+    document.getElementById('np-feedback-uscita').innerHTML='';
   }
 }
 
-function aggiungiPostazione(){
+function aggiungiPostazioneUscita(){
   const nome = document.getElementById('sel-erad-uscita').value;
   const num = document.getElementById('np-numero').value.trim();
-  const loc = document.getElementById('np-localita').value.trim();
-  const fb = document.getElementById('np-feedback');
+  const loc = document.getElementById('np-localita-uscita').value.trim();
+  const fb = document.getElementById('np-feedback-uscita');
   if(!num || !loc){ fb.innerHTML='<div class="alert alert-danger">Inserisci numero posta e località.</div>'; return; }
   if(!POSTAZIONI_MAP[nome]) POSTAZIONI_MAP[nome]=[];
-  POSTAZIONI_MAP[nome].push({l:loc, p:num, lat:'', lon:''});
+  POSTAZIONI_MAP[nome].push({l:loc, p:num, lat:'', lon:'', luce:'', arma:'', v:false});
   fb.innerHTML=`<div class="alert alert-ok"><strong>Postazione ${num} - ${loc}</strong> aggiunta per ${nome}.</div>`;
   toggleNuovaPostazione();
   renderPostazioniGrid(nome);
+  popolaSelectPostazioni();
 }
 
 function salvaUscita(){
@@ -1747,7 +1748,7 @@ function renderAbbattimenti(){
   const ordinati = ABBATTIMENTI.map((r,i)=>({r,i}))
     .sort((a,b) => parseData(b.r[4]) - parseData(a.r[4]));
   tbody.innerHTML = ordinati.map(({r, i:idx}, pos) => {
-    const sessoClass = r[5]==='F1'||r[5]==='FA' ? 'b-warn' : r[5]==='M1'||r[5]==='MA' ? 'b-ok' : 'b-info';
+    const sessoClass = r[5]==='F1'||r[5]==='FA'||r[5]==='F0' ? 'b-warn' : r[5]==='M1'||r[5]==='MA'||r[5]==='M0' ? 'b-ok' : 'b-info';
     return `<tr id="ab-row-${idx}">
       <td style="font-family:var(--mono);font-size:11px;color:var(--text-faint)">${r[0]}</td>
       <td>${r[1]}</td>
@@ -1798,7 +1799,7 @@ function renderDashAbbattimenti(){
   if(!dash) return;
   // Ultimi 5 per data
   const ultimi = [...ABBATTIMENTI].sort((a,b)=>parseData(b[4])-parseData(a[4])).slice(0,5);
-  const sessoClass = s => s==='F1'||s==='FA' ? 'b-warn' : s==='M1'||s==='MA' ? 'b-ok' : 'b-info';
+  const sessoClass = s => s==='F1'||s==='FA'||s==='F0' ? 'b-warn' : s==='M1'||s==='MA'||s==='M0' ? 'b-ok' : 'b-info';
   dash.innerHTML = ultimi.map(r=>`<tr>
     <td>${r[1]}</td>
     <td style="font-family:var(--mono);font-size:11px">${r[4]}</td>
