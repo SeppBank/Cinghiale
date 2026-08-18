@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -1623,6 +1622,7 @@ function aggiungiPostazioneUscita(){
   toggleNuovaPostazione();
   renderPostazioniGrid(nome);
   popolaSelectPostazioni();
+  salvaPostazioniCloud();
 }
 
 function salvaUscita(){
@@ -1973,7 +1973,7 @@ function mostraSync(msg, tipo){
 async function caricaDaCloud(){
   mostraSync('Caricamento dati...', 'info');
   try {
-    const tabs = ['abbattimenti','stock','disc','biometria','uscite','stagione','destinatari','fascette'];
+    const tabs = ['abbattimenti','stock','disc','biometria','uscite','stagione','destinatari','fascette','postazioni'];
     const results = await Promise.all(tabs.map(t =>
       fetch(`${GS_URL}?tabella=${t}`).then(r=>r.json())
     ));
@@ -2005,6 +2005,17 @@ async function caricaDaCloud(){
         }
       });
     }
+    // Carica postazioni aggiuntive/modificate dal cloud
+    if(results[8].righe && results[8].righe.length){
+      results[8].righe.forEach(([nome, postazioniJson]) => {
+        if(nome && postazioniJson){
+          try {
+            const posti = JSON.parse(postazioniJson);
+            if(posti && posti.length) POSTAZIONI_MAP[nome] = posti;
+          } catch(ex){}
+        }
+      });
+    }
     mostraSync('Dati aggiornati', 'ok');
   } catch(err) {
     mostraSync('Errore caricamento - lavoro offline', 'err');
@@ -2013,6 +2024,7 @@ async function caricaDaCloud(){
   renderAbbattimenti(); renderDashAbbattimenti();
   renderBiometria(); renderUscite(); renderDashUscite();
   popolaBioSelect(); renderDestinatari(); initWADate();
+  renderPostazioniTable(); popolaSelectPostazioni();
 }
 
 async function salvaSuCloud(tabella, dati){
@@ -2037,6 +2049,10 @@ async function salvaSuCloud(tabella, dati){
 
 function salvaAbbattimentiCloud(){ salvaSuCloud('abbattimenti', ABBATTIMENTI); }
 function salvaStockCloud(){ salvaSuCloud('stock', stockFascette); }
+function salvaPostazioniCloud(){
+  const dati = Object.entries(POSTAZIONI_MAP).map(([nome, posti]) => [nome, JSON.stringify(posti)]);
+  salvaSuCloud('postazioni', dati);
+}
 function salvaFaszetteCloud(){
   const dati = ERADICATORI.filter(e=>e[3]&&e[3].length).map(e=>[e[1], JSON.stringify(e[3])]);
   salvaSuCloud('fascette', dati);
@@ -2114,6 +2130,7 @@ function salvaCoord(input, nome, pi, field){
   const entry = (POSTAZIONI_MAP[nome]||[])[pi];
   if(entry){ entry[field] = val; }
   renderPostazioniTable();
+  salvaPostazioniCloud();
 }
 
 // ---- Gestione postazioni: aggiungi, elimina, sposta ----
@@ -2159,6 +2176,8 @@ function aggiungiPostazione(){
   setTimeout(()=>fb.innerHTML='',3000);
   resetFormPostazione();
   renderPostazioniTable();
+  popolaSelectPostazioni();
+  salvaPostazioniCloud();
 }
 
 function resetFormPostazione(){
@@ -2174,6 +2193,7 @@ function eliminaPostazione(nome, pi){
   if(!confirm(`Eliminare la postazione "${p.l}" (posta ${p.p||'volante'}) di ${nome}?`)) return;
   POSTAZIONI_MAP[nome].splice(pi,1);
   renderPostazioniTable();
+  salvaPostazioniCloud();
 }
 
 function spostaPostazione(){
@@ -2194,6 +2214,7 @@ function spostaPostazione(){
   document.getElementById('sp-posta').innerHTML='<option value="">— seleziona cacciatore prima —</option>';
   document.getElementById('sp-a').value='';
   renderPostazioniTable();
+  salvaPostazioniCloud();
 }
 
 function copiaPostazione(){
@@ -2211,6 +2232,7 @@ function copiaPostazione(){
   setTimeout(()=>fb.innerHTML='',3000);
   document.getElementById('sp-a').value='';
   renderPostazioniTable();
+  salvaPostazioniCloud();
 }
 
 // ---- Stagione editable ----
