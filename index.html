@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="it">
 <head>
@@ -1485,6 +1484,16 @@ function salvaAbbattimento(){
     return;
   }
 
+  // Controllo fascetta già utilizzata in un altro abbattimento
+  const giaUsata = ABBATTIMENTI.find(a => String(a[7]).trim() === fascetta);
+  if(giaUsata){
+    fb.innerHTML = `<div class="alert alert-danger">
+      La fascetta <strong>${fascetta}</strong> risulta già utilizzata per l'abbattimento n.${giaUsata[0]}
+      (${giaUsata[1]} - ${giaUsata[4]}). Verifica il numero prima di salvare.
+    </div>`;
+    return;
+  }
+
   // Ricava località e posta in base al tipo
   let localita = '', posta = '';
   if(tipo==='fissa'){
@@ -1623,6 +1632,7 @@ function aggiungiPostazioneUscita(){
   toggleNuovaPostazione();
   renderPostazioniGrid(nome);
   popolaSelectPostazioni();
+  salvaPostazioniCloud();
 }
 
 function salvaUscita(){
@@ -1758,7 +1768,7 @@ function renderAbbattimenti(){
       <td style="font-family:var(--mono);font-size:11px">${r[4]}</td>
       <td><span class="badge ${sessoClass}">${r[5]}</span></td>
       <td id="ab-tipo-cell-${idx}" onclick="editTipo(${idx})" title="Clicca per modificare" style="cursor:pointer;">${tipoBadge(r[6])}</td>
-      <td><span class="fasc-chip">${r[7]}</span></td>
+      <td id="ab-fasc-cell-${idx}" onclick="editFascetta(${idx})" title="Clicca per modificare" style="cursor:pointer;"><span class="fasc-chip">${r[7]}</span></td>
       <td style="white-space:nowrap;">
         <button onclick="eliminaAbbattimento(${idx})" title="Elimina" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:14px;padding:2px 4px;">✕</button>
       </td>
@@ -1772,6 +1782,33 @@ function eliminaAbbattimento(idx){
   if(!confirm(`Eliminare l'abbattimento n.${ABBATTIMENTI[idx][0]} di ${ABBATTIMENTI[idx][1]}?`)) return;
   ABBATTIMENTI.splice(idx, 1);
   ABBATTIMENTI.forEach((r,i) => r[0]=i+1);
+  renderAbbattimenti();
+  salvaAbbattimentiCloud();
+}
+
+function editFascetta(idx){
+  const cell = document.getElementById(`ab-fasc-cell-${idx}`);
+  if(cell.querySelector('input')) return;
+  const cur = ABBATTIMENTI[idx][7];
+  cell.innerHTML = `<input type="text" value="${cur}"
+    style="font-size:12px;padding:2px 6px;border:1px solid var(--accent);border-radius:4px;background:var(--surface);color:var(--text);width:80px;"
+    onblur="salvaFascettaAb(${idx},this.value)"
+    onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape')renderAbbattimenti();" />`;
+  cell.querySelector('input').focus();
+  cell.querySelector('input').select();
+}
+
+function salvaFascettaAb(idx, val){
+  val = val.trim();
+  if(!val || val === String(ABBATTIMENTI[idx][7])){ renderAbbattimenti(); return; }
+  // Controllo duplicati (escludendo l'abbattimento corrente)
+  const conflitto = ABBATTIMENTI.find((a,i) => i!==idx && String(a[7]).trim()===val);
+  if(conflitto){
+    alert(`La fascetta ${val} è già utilizzata per l'abbattimento n.${conflitto[0]} (${conflitto[1]}). Modifica annullata.`);
+    renderAbbattimenti();
+    return;
+  }
+  ABBATTIMENTI[idx][7] = val;
   renderAbbattimenti();
   salvaAbbattimentiCloud();
 }
@@ -1973,7 +2010,7 @@ function mostraSync(msg, tipo){
 async function caricaDaCloud(){
   mostraSync('Caricamento dati...', 'info');
   try {
-    const tabs = ['abbattimenti','stock','disc','biometria','uscite','stagione','destinatari','fascette'];
+    const tabs = ['abbattimenti','stock','disc','biometria','uscite','stagione','destinatari','fascette','postazioni'];
     const results = await Promise.all(tabs.map(t =>
       fetch(`${GS_URL}?tabella=${t}`).then(r=>r.json())
     ));
@@ -2005,6 +2042,17 @@ async function caricaDaCloud(){
         }
       });
     }
+    // Carica postazioni aggiuntive/modificate dal cloud
+    if(results[8].righe && results[8].righe.length){
+      results[8].righe.forEach(([nome, postazioniJson]) => {
+        if(nome && postazioniJson){
+          try {
+            const posti = JSON.parse(postazioniJson);
+            if(posti && posti.length) POSTAZIONI_MAP[nome] = posti;
+          } catch(ex){}
+        }
+      });
+    }
     mostraSync('Dati aggiornati', 'ok');
   } catch(err) {
     mostraSync('Errore caricamento - lavoro offline', 'err');
@@ -2013,6 +2061,7 @@ async function caricaDaCloud(){
   renderAbbattimenti(); renderDashAbbattimenti();
   renderBiometria(); renderUscite(); renderDashUscite();
   popolaBioSelect(); renderDestinatari(); initWADate();
+  renderPostazioniTable(); popolaSelectPostazioni();
 }
 
 async function salvaSuCloud(tabella, dati){
@@ -2037,6 +2086,10 @@ async function salvaSuCloud(tabella, dati){
 
 function salvaAbbattimentiCloud(){ salvaSuCloud('abbattimenti', ABBATTIMENTI); }
 function salvaStockCloud(){ salvaSuCloud('stock', stockFascette); }
+function salvaPostazioniCloud(){
+  const dati = Object.entries(POSTAZIONI_MAP).map(([nome, posti]) => [nome, JSON.stringify(posti)]);
+  salvaSuCloud('postazioni', dati);
+}
 function salvaFaszetteCloud(){
   const dati = ERADICATORI.filter(e=>e[3]&&e[3].length).map(e=>[e[1], JSON.stringify(e[3])]);
   salvaSuCloud('fascette', dati);
@@ -2114,6 +2167,7 @@ function salvaCoord(input, nome, pi, field){
   const entry = (POSTAZIONI_MAP[nome]||[])[pi];
   if(entry){ entry[field] = val; }
   renderPostazioniTable();
+  salvaPostazioniCloud();
 }
 
 // ---- Gestione postazioni: aggiungi, elimina, sposta ----
@@ -2159,6 +2213,8 @@ function aggiungiPostazione(){
   setTimeout(()=>fb.innerHTML='',3000);
   resetFormPostazione();
   renderPostazioniTable();
+  popolaSelectPostazioni();
+  salvaPostazioniCloud();
 }
 
 function resetFormPostazione(){
@@ -2174,6 +2230,7 @@ function eliminaPostazione(nome, pi){
   if(!confirm(`Eliminare la postazione "${p.l}" (posta ${p.p||'volante'}) di ${nome}?`)) return;
   POSTAZIONI_MAP[nome].splice(pi,1);
   renderPostazioniTable();
+  salvaPostazioniCloud();
 }
 
 function spostaPostazione(){
@@ -2194,6 +2251,7 @@ function spostaPostazione(){
   document.getElementById('sp-posta').innerHTML='<option value="">— seleziona cacciatore prima —</option>';
   document.getElementById('sp-a').value='';
   renderPostazioniTable();
+  salvaPostazioniCloud();
 }
 
 function copiaPostazione(){
@@ -2211,6 +2269,7 @@ function copiaPostazione(){
   setTimeout(()=>fb.innerHTML='',3000);
   document.getElementById('sp-a').value='';
   renderPostazioniTable();
+  salvaPostazioniCloud();
 }
 
 // ---- Stagione editable ----
