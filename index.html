@@ -2007,6 +2007,7 @@ function mostraSync(msg, tipo){
   if(tipo==='ok') setTimeout(()=>{ el.style.opacity='0'; }, 3000);
 }
 
+let _cloudCaricato = false; // true solo dopo un caricamento completo da Google Sheets
 async function caricaDaCloud(){
   mostraSync('Caricamento dati...', 'info');
   try {
@@ -2014,6 +2015,8 @@ async function caricaDaCloud(){
     const results = await Promise.all(tabs.map(t =>
       fetch(`${GS_URL}?tabella=${t}`).then(r=>r.json())
     ));
+    // Se una risposta non è valida, considera il caricamento fallito (nessun salvataggio permesso)
+    if(results.some(r=>!r || !Array.isArray(r.righe))) throw new Error('Risposta cloud non valida');
     if(results[0].righe && results[0].righe.length) ABBATTIMENTI = results[0].righe;
     if(results[1].righe && results[1].righe.length) stockFascette = results[1].righe;
     if(results[2].righe && results[2].righe.length){
@@ -2053,9 +2056,11 @@ async function caricaDaCloud(){
         }
       });
     }
+    _cloudCaricato = true;
     mostraSync('Dati aggiornati', 'ok');
   } catch(err) {
-    mostraSync('Errore caricamento - lavoro offline', 'err');
+    _cloudCaricato = false;
+    mostraSync('Errore caricamento - NON salvare, ricarica la pagina', 'err');
   }
   renderErad(); renderBlocchi(); renderStock();
   renderAbbattimenti(); renderDashAbbattimenti();
@@ -2065,6 +2070,11 @@ async function caricaDaCloud(){
 }
 
 async function salvaSuCloud(tabella, dati){
+  // Protezione anti-perdita dati: senza caricamento completo il salvataggio sovrascriverebbe il cloud
+  if(!_cloudCaricato){
+    alert('I dati non sono stati caricati da Google Sheets (connessione lenta o assente). Per non perdere i dati il salvataggio è bloccato: ricarica la pagina e riprova.');
+    return;
+  }
   // Protezione: non sovrascrivere mai il cloud con array vuoti
   // per tabelle che devono contenere dati
   const tabelleProtette = ['uscite','abbattimenti','biometria','destinatari'];
