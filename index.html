@@ -561,6 +561,23 @@
           </div>
         </div>
       </div>
+
+      <!-- Backup dati -->
+      <div class="card" style="margin-top:16px;">
+        <div class="card-head"><h3>Backup dei dati</h3></div>
+        <div class="card-body">
+          <p style="font-size:13px;color:var(--text-muted);margin-bottom:12px;">Salva sul tuo dispositivo una copia di tutti i dati (uscite, abbattimenti, biometria, fascette, abilitati, postazioni, destinatari). Conservala con la data nel nome.</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;">
+            <button class="btn btn-primary" onclick="scaricaBackup()">Scarica backup completo</button>
+            <button class="btn btn-secondary" onclick="scaricaUsciteCSV()">Scarica uscite (Excel)</button>
+          </div>
+          <div style="border-top:1px solid var(--border);padding-top:12px;">
+            <label style="font-size:12px;color:var(--text-muted);display:block;margin-bottom:6px;">Ripristina da un file di backup</label>
+            <input type="file" id="backup-file" accept=".json,application/json" onchange="ripristinaBackup(this)"/>
+          </div>
+          <div id="backup-feedback" style="margin-top:8px;"></div>
+        </div>
+      </div>
     </div>
 
     <!-- ===== POSTAZIONI ===== -->
@@ -2628,6 +2645,98 @@ function showMobile(id, btn){
   const sideBtn = document.querySelector(`.nav-item[onclick*="'${id}'"]`);
   show(id, sideBtn || btn);
   chiudiMenu();
+}
+
+// ---- Backup e ripristino ----
+function _dataFile(){
+  const d=new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function _scarica(nome, contenuto, tipo){
+  const blob = new Blob([contenuto], {type: tipo});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nome;
+  document.body.appendChild(a); a.click();
+  setTimeout(()=>{ document.body.removeChild(a); URL.revokeObjectURL(url); }, 500);
+}
+function scaricaBackup(){
+  const fb = document.getElementById('backup-feedback');
+  if(!_cloudCaricato){
+    fb.innerHTML='<div class="alert alert-danger">I dati non sono ancora stati caricati da Google Sheets: ricarica la pagina e attendi "Dati aggiornati" prima di fare il backup.</div>';
+    return;
+  }
+  const el = document.getElementById('stagione-label');
+  const backup = {
+    versione: 1,
+    creato: new Date().toISOString(),
+    stagione: el ? el.textContent.replace('Stagione ','').trim() : '',
+    uscite: USCITE,
+    abbattimenti: ABBATTIMENTI,
+    biometria: BIOMETRIA,
+    stock: stockFascette,
+    destinatari: DESTINATARI,
+    eradicatori: ERADICATORI,
+    postazioni: POSTAZIONI_MAP
+  };
+  _scarica(`backup_cinghiale_${_dataFile()}.json`, JSON.stringify(backup), 'application/json');
+  fb.innerHTML=`<div class="alert alert-ok"><strong>Backup scaricato</strong>: ${USCITE.length} uscite, ${ABBATTIMENTI.length} abbattimenti.</div>`;
+  setTimeout(()=>fb.innerHTML='', 6000);
+}
+function scaricaUsciteCSV(){
+  const fb = document.getElementById('backup-feedback');
+  if(!_cloudCaricato){
+    fb.innerHTML='<div class="alert alert-danger">Dati non ancora caricati: ricarica la pagina e riprova.</div>';
+    return;
+  }
+  const esc = v => '"' + String(v==null?'':v).replace(/"/g,'""') + '"';
+  const righe = [['Controllore','Località','Posta','Luce','Data','Orario','Latitudine','Longitudine']];
+  USCITE.forEach(r=>righe.push([r[0],r[1],r[2],r[3],r[5],r[6],r[7]||'',r[8]||'']));
+  const csv = '\uFEFF' + righe.map(r=>r.map(esc).join(';')).join('\r\n');
+  _scarica(`uscite_cinghiale_${_dataFile()}.csv`, csv, 'text/csv;charset=utf-8');
+}
+function ripristinaBackup(input){
+  const fb = document.getElementById('backup-feedback');
+  const file = input.files && input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let b;
+    try { b = JSON.parse(reader.result); } catch(e){ b = null; }
+    input.value = '';
+    if(!b || b.versione!==1 || !Array.isArray(b.uscite) || !Array.isArray(b.abbattimenti) || !Array.isArray(b.eradicatori) || typeof b.postazioni!=='object'){
+      fb.innerHTML='<div class="alert alert-danger">File non valido: non è un backup del gestionale.</div>';
+      return;
+    }
+    if(!_cloudCaricato){
+      fb.innerHTML='<div class="alert alert-danger">Prima attendi "Dati aggiornati" (ricarica la pagina), poi ripristina.</div>';
+      return;
+    }
+    if(!confirm(`Ripristinare il backup del ${b.creato ? b.creato.slice(0,10) : '?'}?\n\n${b.uscite.length} uscite, ${b.abbattimenti.length} abbattimenti.\n\nI dati attuali (${USCITE.length} uscite, ${ABBATTIMENTI.length} abbattimenti) verranno SOSTITUITI, anche su Google Sheets.`)) return;
+    USCITE = b.uscite;
+    ABBATTIMENTI = b.abbattimenti;
+    BIOMETRIA = Array.isArray(b.biometria) ? b.biometria : [];
+    stockFascette = Array.isArray(b.stock) ? b.stock : [];
+    DESTINATARI = Array.isArray(b.destinatari) ? b.destinatari : [];
+    ERADICATORI.splice(0, ERADICATORI.length, ...b.eradicatori);
+    Object.keys(POSTAZIONI_MAP).forEach(k=>delete POSTAZIONI_MAP[k]);
+    Object.assign(POSTAZIONI_MAP, b.postazioni);
+    salvaSuCloud('uscite', USCITE);
+    salvaSuCloud('abbattimenti', ABBATTIMENTI);
+    salvaSuCloud('biometria', BIOMETRIA);
+    salvaSuCloud('stock', stockFascette);
+    salvaSuCloud('destinatari', DESTINATARI);
+    salvaFaszetteCloud();
+    salvaDiscCloud();
+    salvaPostazioniCloud();
+    renderErad(); renderBlocchi(); renderStock();
+    renderAbbattimenti(); renderDashAbbattimenti();
+    renderBiometria(); renderUscite(); renderDashUscite();
+    popolaBioSelect(); renderDestinatari();
+    renderPostazioniTable(); popolaSelectPostazioni();
+    fb.innerHTML='<div class="alert alert-ok"><strong>Backup ripristinato.</strong> Ricarica la pagina per controllare.</div>';
+  };
+  reader.readAsText(file);
 }
 
 // ---- Init ----
