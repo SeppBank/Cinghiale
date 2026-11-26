@@ -1207,7 +1207,7 @@ function renderErad(){
       : '<span style="color:var(--text-faint);font-size:12px">-</span>';
 
     const discCell = disc
-      ? `<span class="disc-edit" onclick="editDisc(this,'${nome}')" title="Clicca per modificare" style="cursor:pointer;border-bottom:1px dashed var(--border-strong);font-size:12px;">${disc}</span>`
+      ? `<span class="disc-edit" onclick="editDisc(this,'${nome}')" title="Clicca per modificare" style="cursor:pointer;border-bottom:1px dashed var(--border-strong);font-size:12px;">${disc}</span><button onclick="rimuoviDisc('${nome.replace(/'/g,"\\'")}')" title="Rimuovi la data (torna a non firmato)" style="background:none;border:none;cursor:pointer;color:var(--danger);font-size:12px;margin-left:6px;padding:0 2px;">✕</button>`
       : `<span class="disc-edit" onclick="editDisc(this,'${nome}')" title="Clicca per inserire" style="cursor:pointer;color:var(--danger);font-size:12px;">non firmato - clicca per inserire</span>`;
 
     // Pulsante ritiro / riattiva
@@ -1265,6 +1265,16 @@ function editDisc(span, nome){
   const esc = nome.replace(/'/g, "\\'");
   span.innerHTML = `<input type="date" value="${current ? current.split('/').reverse().join('-') : ''}" style="font-size:12px;padding:2px 6px;border:1px solid var(--accent);border-radius:4px;background:var(--surface);color:var(--text);" onblur="salvaDisc(this,'${esc}')" onkeydown="if(event.key==='Enter')this.blur();if(event.key==='Escape'){renderErad();}" />`;
   span.querySelector('input').focus();
+}
+
+function rimuoviDisc(nome){
+  const e = ERADICATORI.find(x=>x[1]===nome);
+  if(!e) return;
+  if(!confirm('Rimuovere la data del disciplinare di '+nome+'?\nTornerà "non firmato".')) return;
+  e[2] = '';
+  renderErad();
+  renderBlocchi();
+  salvaDiscCloud();
 }
 
 function salvaDisc(input, nome){
